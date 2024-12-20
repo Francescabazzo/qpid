@@ -2,8 +2,11 @@ import streamlit as st
 from streamlit_folium import st_folium
 import folium
 import pandas as pd
+
 from utils.db_connection import connect2db
 from utils.converters import gender_num2text
+from utils.utils import calcLatLonRange
+from backend.backend import get_matches
 
 st.set_page_config(
     page_title='QPID - Matches',
@@ -11,6 +14,49 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
+
+def loadMe():
+    df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{st.session_state['user_ID']}'", connect2db())
+
+    return df
+
+def loadProfiles(user):
+    user = user.iloc[0]
+    query = f"SELECT * FROM full_profiles WHERE ID > 0 "  # ID > 0 serve solo da placeholder per poi concatenare AND
+    if user['age_flag_other'] == 1:
+        query += f"AND age >= {user['age_other'] - user['age_radius_other']} AND age <= {user['age_other'] + user['age_radius_other']} "
+
+    if user['distance_flag_other'] == 1:
+        lat_min, lat_max, lon_min, lon_max = calcLatLonRange(user['latitude'], user['longitude'],
+                                                             user['distance_km_other'])
+        query += f"AND latitude >= {lat_min} AND latitude <= {lat_max} AND longitude >= {lon_min} AND longitude <= {lon_max} "
+
+    # GENERI
+    cases = {
+        ('1', '1'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '1' AND gender_other = '3'))",
+        ('1', '2'): f"AND ((gender = '2' AND gender_other = '1') OR (gender = '2' AND gender_other = '3'))",
+        ('1','3'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '2' AND gender_other = '1')OR (gender = '3' AND gender_other = '1')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+        ('2', '1'): f"AND ((gender = '1' AND gender_other = '2') OR (gender = '1' AND gender_other = '3'))",
+        ('2', '2'): f"AND ((gender = '2' AND gender_other = '2') OR (gender = '2' AND gender_other = '3'))",
+        ('2', '3'): f"AND ((gender = '1' AND gender_other = '2') OR (gender = '2' AND gender_other = '2')OR (gender = '3' AND gender_other = '2')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+        ('3', '1'): f"AND (gender = '1' AND gender_other = '3')",
+        ('3', '2'): f"AND (gender = '2' AND gender_other = '3')",
+        ('3', '3'): f"AND ((gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+    }
+
+    query += cases.get((user['gender'], user['gender_other']), "")
+
+    df = pd.read_sql(query, connect2db())
+
+    return df
+
+def loadMatches(matches):
+    list = ', '.join(map(str, matches))
+
+    df = pd.read_sql(f"SELECT * from full_profiles WHERE ID IN ({list})", connect2db())
+
+    return df
 
 @st.dialog("User details", width="large")
 def user_details(user):
@@ -80,19 +126,29 @@ def profile_card(user):
 
 
 def find_matches():
-    st.session_state['matches_found'] = True
-    df = pd.read_sql("SELECT * FROM profiles WHERE ID <= 5", connect2db())
+    df_me = loadMe()
+    df_intos = loadProfiles(df_me)
 
-    for index, row in df.iterrows():
+    #df = pd.read_sql("SELECT * FROM profiles WHERE ID <= 5", connect2db())
+
+    matches = get_matches(df_intos, df_me)
+
+    df_matches = loadMatches(matches)
+
+    for index, row in df_matches.iterrows():
         profile_card(row)
 
+def callback() :
+    st.session_state['matches_found'] = True
 
 if 'user_login' not in st.session_state:
     st.warning("You must log in to continue!", icon="⚠️")
 
 elif 'matches_found' not in st.session_state:
     with st.form(key='matches_form'):
-        submit_button = st.form_submit_button(label='Find Matches', on_click=find_matches)
+        submit_button = st.form_submit_button(label='Find Matches', on_click=callback())
 else:
     st.header("Matching Profiles")
+    st.text("Here you can find your 5 best matches!")
+
     find_matches()
