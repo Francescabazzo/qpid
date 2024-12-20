@@ -6,3 +6,5 @@ numpy~=1.26.4
 mysql-connector-python~=8.4.0
 pandas~=2.2.3
 streamlit-aggrid~=1.0.5
+scipy~=1.14.1
+scikit-learn~=1.6.0
