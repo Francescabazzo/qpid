@@ -1,0 +1,8 @@
+streamlit~=1.40.2
+folium~=0.18.0
+streamlit_folium~=0.23.2
+hydralit_components~=1.0.10
+numpy~=1.26.4
+mysql-connector-python~=8.4.0
+pandas~=2.2.3
+streamlit-aggrid~=1.0.5
