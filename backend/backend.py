@@ -12,6 +12,10 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
                            "age_radius_other", "distance_flag_other", "distance_km_other",
                            "same_interests"])
 
+    search = search.drop(columns=["name", "bio", "gender", "gender_other", "age_flag_other",
+                           "age_radius_other", "distance_flag_other", "distance_km_other",
+                           "same_interests"])
+
     search["age"] = search["age_other"]
     search["sports"] = search["sports_other"]
     search["tv_sports"] = search["tv_sports_other"]
@@ -31,13 +35,12 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
                         'intelligence_important', 'funniness_important',
                         'ambition_important']].to_numpy(dtype=np.uint8)[0]
 
-    search = search.drop(columns=(["age_other"] + list(df.filter(regex='.*other$')) + list(df.filter(regex='.*important$'))))
+    search = search.drop(columns=(["age_other"] + list(df.filter(regex=".*other$")) + list(df.filter(regex=".*important$"))))
     search.iloc[:, 4:9] = 0
 
-    df = df[df["ID"] != search.iloc[0, 0]]
     IDs = df["ID"].to_list()
     IDs.append(search.iloc[0,0])
-    IDs = np.array(IDs)
+    IDs = np.array(IDs, dtype=np.uint32)
     df = df.drop(columns=(["age_other", "ID"] + list(df.filter(regex='.*other$')) + list(df.filter(regex='.*important$'))))
     search = search.drop(columns=["ID"])
     search = search.to_numpy()[0]
