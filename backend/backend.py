@@ -2,19 +2,17 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import HDBSCAN
 from sklearn.neighbors import NearestNeighbors
-from scipy.spatial.distance import cdist
+from scipy.spatial.distance import cdist, pdist
 
 def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     exps = [(1/5), (1/1.3), 1, 2, 5]
 
     # ---Preparazione (da modificare)---
-    df = df1.drop(columns=["name", "bio", "gender", "gender_other", "age_flag_other",
-                           "age_radius_other", "distance_flag_other", "distance_km_other",
-                           "same_interests"])
-
-    search = search.drop(columns=["name", "bio", "gender", "gender_other", "age_flag_other",
-                           "age_radius_other", "distance_flag_other", "distance_km_other",
-                           "same_interests"])
+    unnecessary = ["name", "bio", "gender", "gender_other", "age_flag_other",
+                   "age_radius_other", "distance_flag_other", "distance_km_other",
+                   "same_interests"]
+    df = df1.drop(columns=unnecessary)
+    search = search.drop(columns=unnecessary)
 
     search["age"] = search["age_other"]
     search["sports"] = search["sports_other"]
@@ -31,17 +29,19 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     search["music"] = search["music_other"]
     search["shopping"] = search["shopping_other"]
     search["yoga"] = search["yoga_other"]
-    weights = search[['attractiveness_important', 'sincerity_important',
-                        'intelligence_important', 'funniness_important',
-                        'ambition_important']].to_numpy(dtype=np.uint8)[0]
 
-    search = search.drop(columns=(["age_other"] + list(df.filter(regex=".*other$")) + list(df.filter(regex=".*important$"))))
+    importants = ['attractiveness_important', 'sincerity_important',
+                  'intelligence_important', 'funniness_important',
+                  'ambition_important']
+    weights = search[importants].to_numpy(dtype=np.uint8)[0]
+
+    search = search.drop(columns=(list(df.filter(regex=".*other$")) + list(df.filter(regex=".*important$"))))
     search.iloc[:, 4:9] = 0
 
     IDs = df["ID"].to_list()
     IDs.append(search.iloc[0,0])
     IDs = np.array(IDs, dtype=np.uint32)
-    df = df.drop(columns=(["age_other", "ID"] + list(df.filter(regex='.*other$')) + list(df.filter(regex='.*important$'))))
+    df = df.drop(columns=(["ID"] + list(df.filter(regex='.*other$')) + list(df.filter(regex='.*important$'))))
     search = search.drop(columns=["ID"])
     search = search.to_numpy()[0]
     X = df.to_numpy()
@@ -72,5 +72,10 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     nn.fit(X)
     idxs = nn.kneighbors(X[-1].reshape(1,-1), return_distance=False, n_neighbors=6)
 
+    # the cosine distance is returned to the user as a percentage
+    # to understand the goodness of the match
+    dsts = pdist(X[idxs[0]], metric="cosine")[0:5]
+    dsts = (2-dsts)/2*100
+    
     # ---Result---
-    return IDs[idxs[0, 1:]]
+    return IDs[idxs[0, 1:]], dsts
