@@ -15,11 +15,11 @@ st.set_page_config(
 )
 
 
-
 def loadMe():
     df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{st.session_state['user_ID']}'", connect2db())
 
     return df
+
 
 def loadProfiles(user):
     user = user.iloc[0]
@@ -36,13 +36,16 @@ def loadProfiles(user):
     cases = {
         ('1', '1'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '1' AND gender_other = '3'))",
         ('1', '2'): f"AND ((gender = '2' AND gender_other = '1') OR (gender = '2' AND gender_other = '3'))",
-        ('1','3'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '2' AND gender_other = '1')OR (gender = '3' AND gender_other = '1')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+        ('1',
+         '3'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '2' AND gender_other = '1')OR (gender = '3' AND gender_other = '1')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
         ('2', '1'): f"AND ((gender = '1' AND gender_other = '2') OR (gender = '1' AND gender_other = '3'))",
         ('2', '2'): f"AND ((gender = '2' AND gender_other = '2') OR (gender = '2' AND gender_other = '3'))",
-        ('2', '3'): f"AND ((gender = '1' AND gender_other = '2') OR (gender = '2' AND gender_other = '2')OR (gender = '3' AND gender_other = '2')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+        ('2',
+         '3'): f"AND ((gender = '1' AND gender_other = '2') OR (gender = '2' AND gender_other = '2')OR (gender = '3' AND gender_other = '2')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
         ('3', '1'): f"AND (gender = '1' AND gender_other = '3')",
         ('3', '2'): f"AND (gender = '2' AND gender_other = '3')",
-        ('3', '3'): f"AND ((gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+        ('3',
+         '3'): f"AND ((gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
     }
 
     query += cases.get((user['gender'], user['gender_other']), "")
@@ -51,12 +54,16 @@ def loadProfiles(user):
 
     return df
 
-def loadMatches(matches):
-    list = ', '.join(map(str, matches))
 
-    df = pd.read_sql(f"SELECT * from full_profiles WHERE ID IN ({list})", connect2db())
+def loadMatches(matches):
+    matches_list = ', '.join(map(str, matches))
+
+    df = pd.read_sql(
+        f"SELECT * from full_profiles WHERE ID IN ({matches_list}) ORDER BY CASE ID {' '.join([f'WHEN {_id} THEN {i}' for i, _id in enumerate(matches)])} ELSE {len(matches)} END",
+        connect2db())
 
     return df
+
 
 @st.dialog("User details", width="large")
 def user_details(user):
@@ -131,7 +138,7 @@ def find_matches():
     df_me = loadMe()
     df_intos = loadProfiles(df_me)
 
-    #df = pd.read_sql("SELECT * FROM profiles WHERE ID <= 5", connect2db())
+    # df = pd.read_sql("SELECT * FROM profiles WHERE ID <= 5", connect2db())
 
     matches, accuracy_scores = get_matches(df_intos, df_me)
 
@@ -140,8 +147,10 @@ def find_matches():
     for index, row in df_matches.iterrows():
         profile_card(row, accuracy_scores[index])
 
-def callback() :
+
+def callback():
     st.session_state['matches_found'] = True
+
 
 if 'user_login' not in st.session_state:
     st.warning("You must log in to continue!", icon="⚠️")
