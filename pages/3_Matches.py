@@ -91,8 +91,10 @@ def user_details(user):
         st.write(f"**-Yoga**: {user['yoga']}")
 
 
-def profile_card(user):
+def profile_card(user, accuracy_score):
     with st.expander(f"{user['name']}", expanded=True):
+        st.progress(text=f"Match Accuracy: {int(accuracy_score)} %", value=int(accuracy_score))
+
         tab1, tab2 = st.columns([1, 2], gap='large')
 
         with tab1:
@@ -131,12 +133,12 @@ def find_matches():
 
     #df = pd.read_sql("SELECT * FROM profiles WHERE ID <= 5", connect2db())
 
-    matches = get_matches(df_intos, df_me)
+    matches, accuracy_scores = get_matches(df_intos, df_me)
 
     df_matches = loadMatches(matches)
 
     for index, row in df_matches.iterrows():
-        profile_card(row)
+        profile_card(row, accuracy_scores[index])
 
 def callback() :
     st.session_state['matches_found'] = True
