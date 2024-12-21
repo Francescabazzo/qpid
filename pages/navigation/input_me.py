@@ -156,7 +156,7 @@ def input_me():
                         step=1)
     data['movies'] = st.slider("Movies", key="movies", min_value=1, max_value=10, value=(user['movies'] if user['movies'] else 5),
                        step=1)
-    data['music'] = st.slider("Clubbing", key="music", min_value=1, max_value=10, value=(user['music'] if user['music'] else 5),
+    data['music'] = st.slider("Music", key="music", min_value=1, max_value=10, value=(user['music'] if user['music'] else 5),
                       step=1)
     data['shopping'] = st.slider("Shopping", key="shopping", min_value=1, max_value=10, value=(user['shopping'] if user['shopping'] else 5),
                          step=1)
