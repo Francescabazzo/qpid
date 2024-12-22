@@ -36,7 +36,7 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     characteristic_weights = search[importants].to_numpy(dtype=np.uint8)[0]
 
     search = search.drop(columns=(list(df.filter(regex=".*other$")) + list(df.filter(regex=".*important$"))))
-    search.iloc[:, 4:9] = 0
+    search.iloc[:, 4:9] = 1
 
     IDs = df["ID"].to_list()
     IDs.append(search.iloc[0,0])
