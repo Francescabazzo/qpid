@@ -4,7 +4,7 @@ from sklearn.cluster import HDBSCAN
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
 
-exps = [(1/5), (1/1.3), 1, 2, 5]
+deformation_exps = [(1/5), (1/1.3), 1, 2, 5]
 
 def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     # ---Preparazione (da modificare)---
@@ -33,7 +33,7 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     importants = ['attractiveness_important', 'sincerity_important',
                   'intelligence_important', 'funniness_important',
                   'ambition_important']
-    weights = search[importants].to_numpy(dtype=np.uint8)[0]
+    characteristic_weights = search[importants].to_numpy(dtype=np.uint8)[0]
 
     search = search.drop(columns=(list(df.filter(regex=".*other$")) + list(df.filter(regex=".*important$"))))
     search.iloc[:, 4:9] = 0
@@ -49,7 +49,7 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
 
     # ---Variable deformation---
     for cnt, i in enumerate(range(3,8)):
-        X[:-1,i] = np.int64(np.float_power((11-X[:-1,i]), exps[weights[cnt]-1]))
+        X[:-1,i] = np.int64(np.float_power((11-X[:-1,i]), deformation_exps[characteristic_weights[cnt]-1]))
 
     # ---Clustering---
     clustering = HDBSCAN(min_cluster_size=6, n_jobs=-1, store_centers="centroid", allow_single_cluster=True)
@@ -75,11 +75,13 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     # ---Calculate Scores---
     # Variable de-deformation
     for cnt, i in enumerate(range(3,8)):
-        X[:-1,i] = 11-np.float_power((X[:-1,i]), 1/exps[weights[cnt]-1])
+        X[:-1,i] = 11-np.float_power((X[:-1,i]), 1/deformation_exps[characteristic_weights[cnt]-1])
 
     scores = np.absolute(X[idxs[0]]-X[-1])[:,3:]
     scores[:,5:] = 10-scores[:,5:]
-    scores = np.mean(scores, axis=1)*10
+    score_weights = np.ones(scores.shape[1])
+    score_weights[:5] = characteristic_weights
+    scores = np.average(scores, axis=1, weights=score_weights)*10
 
     # ---Result---
     return IDs[idxs[0]], scores
