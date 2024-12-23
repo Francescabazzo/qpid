@@ -123,26 +123,24 @@ def input_other():
 
         data['attractiveness_important'] = st.slider("Attractiveness", key="attractiveness_important", min_value=1,
                                                      max_value=5, value=(
-                intos['attractiveness_important'] if intos['attractiveness_important'] else 5), step=1)
+                intos['attractiveness_important'] if intos['attractiveness_important'] else 3), step=1)
         data['sincerity_important'] = st.slider("Sincerity", key="sincerity_important", min_value=1,
                                                 max_value=5, value=(
-                intos['sincerity_important'] if intos['sincerity_important'] else 5), step=1)
+                intos['sincerity_important'] if intos['sincerity_important'] else 3), step=1)
         data['intelligence_important'] = st.slider("Intelligence", key="intelligence_important", min_value=1,
                                                    max_value=5, value=(
-                intos['intelligence_important'] if intos['intelligence_important'] else 5), step=1)
+                intos['intelligence_important'] if intos['intelligence_important'] else 3), step=1)
         data['funniness_important'] = st.slider("Funniness", key="funniness_important", min_value=1,
                                                 max_value=5, value=(
-                intos['funniness_important'] if intos['funniness_important'] else 5), step=1)
+                intos['funniness_important'] if intos['funniness_important'] else 3), step=1)
         data['ambition_important'] = st.slider("Ambition", key="ambition_important", min_value=1,
                                                max_value=5, value=(
-                intos['ambition_important'] if intos['ambition_important'] else 5), step=1)
+                intos['ambition_important'] if intos['ambition_important'] else 3), step=1)
 
     with tab2:
         st.subheader("What should be the interests of your perfect partner?")
 
         data['same_interest'] = st.checkbox("Same as mine", key="same_interest", value=intos['same_interest'])
-
-        # TODO FORZARE COPIA DA PROFILO SE STESSI INTERESSI -- ALTRIMENTI, RISCHIO INCONSISTENZE!
 
         if not data['same_interest']:
             data['sports'] = st.slider("Sports", key="sports", min_value=1, max_value=10,

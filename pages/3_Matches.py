@@ -2,11 +2,13 @@ import streamlit as st
 from streamlit_folium import st_folium
 import folium
 import pandas as pd
+from mysql.connector import Error
 
 from utils.db_connection import connect2db
 from utils.converters import gender_num2text
 from utils.utils import calcLatLonRange
 from backend.backend import get_matches
+from utils.db_utils import load_likes_dislikes
 
 st.set_page_config(
     page_title='QPID - Matches',
@@ -21,7 +23,7 @@ def loadMe():
     return df
 
 
-def loadProfiles(user):
+def loadProfiles(user, likes_dislikes):
     user = user.iloc[0]
     query = f"SELECT * FROM full_profiles WHERE ID > 0 "  # ID > 0 serve solo da placeholder per poi concatenare AND
     if user['age_flag_other'] == 1:
@@ -32,7 +34,7 @@ def loadProfiles(user):
                                                              user['distance_km_other'])
         query += f"AND latitude >= {lat_min} AND latitude <= {lat_max} AND longitude >= {lon_min} AND longitude <= {lon_max} "
 
-    # GENERI
+    # GENRES
     cases = {
         ('1', '1'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '1' AND gender_other = '3'))",
         ('1', '2'): f"AND ((gender = '2' AND gender_other = '1') OR (gender = '2' AND gender_other = '3'))",
@@ -52,7 +54,11 @@ def loadProfiles(user):
 
     df = pd.read_sql(query, connect2db())
 
-    return df
+    # FILTERS OUT DISLIKES
+
+    dislikes = likes_dislikes[likes_dislikes['like_dislike'] == 0]['ID_other'].tolist()
+
+    return df[~df['ID'].isin(dislikes)]
 
 
 def loadMatches(matches):
@@ -98,9 +104,9 @@ def user_details(user):
         st.write(f"**-Yoga**: {user['yoga']}")
 
 
-def profile_card(user, accuracy_score):
+def profile_card(user, accuracy_score, likes_dislikes):
     with st.expander(f"{user['name']}", expanded=True):
-        st.progress(text=f"Match Accuracy: {int(accuracy_score)} %", value=int(accuracy_score))
+        st.progress(text=f"Match Accuracy: {accuracy_score:.2f} %", value=int(accuracy_score))
 
         tab1, tab2 = st.columns([1, 2], gap='large')
 
@@ -125,28 +131,46 @@ def profile_card(user, accuracy_score):
             if st.button("More Details", icon="🔍", key=user['ID']):
                 user_details(user)
 
-        with btn2:
-            if st.button("LIKE", icon="👍", key=f"like_{user['ID']}"):
-                st.balloons()
+        if not likes_dislikes.loc[(likes_dislikes['ID_other'] == user['ID']), 'like_dislike'].empty  :
+            with btn2:
+                st.write(f"You already set a **like** to this profile.")
+        else :
+            with btn2:
+                if st.button("LIKE", icon="👍", key=f"like_{user['ID']}"):
+                    set_like_dislike(st.session_state['user_ID'], user['ID'], 1)
 
-        with btn3:
-            if st.button("DISLIKE", icon="👎", key=f"dislike_{user['ID']}"):
-                st.snow()
+            with btn3:
+                if st.button("DISLIKE", icon="👎", key=f"dislike_{user['ID']}"):
+                    set_like_dislike(st.session_state['user_ID'], user['ID'], 0)
 
 
-def find_matches():
-    df_me = loadMe()
-    df_intos = loadProfiles(df_me)
-
-    # df = pd.read_sql("SELECT * FROM profiles WHERE ID <= 5", connect2db())
-
+def find_matches(df_me, likes_dislikes):
+    df_intos = loadProfiles(df_me, likes_dislikes)
     matches, accuracy_scores = get_matches(df_intos, df_me)
-
     df_matches = loadMatches(matches)
 
     for index, row in df_matches.iterrows():
-        profile_card(row, accuracy_scores[index])
+        profile_card(row, accuracy_scores[index], likes_dislikes)
 
+def set_like_dislike(id_me, id_other, like_dislike) :
+    conn = connect2db()
+    cursor = conn.cursor()
+
+    try:
+        query = f"INSERT INTO likes SET ID='{id_me}', ID_other='{id_other}', like_dislike='{like_dislike}'"
+
+        cursor.execute(query)
+        conn.commit()
+
+        if like_dislike:
+            st.balloons()
+        else :
+            st.snow()
+    except Error as e:
+        st.error(f"An error occurred while updating your likes/dislikes in the database: {e}", icon="❌")
+    finally:
+        cursor.close()
+        conn.close()
 
 def callback():
     st.session_state['matches_found'] = True
@@ -155,11 +179,17 @@ def callback():
 if 'user_login' not in st.session_state:
     st.warning("You must log in to continue!", icon="⚠️")
 
-elif 'matches_found' not in st.session_state:
-    with st.form(key='matches_form'):
-        submit_button = st.form_submit_button(label='Find Matches', on_click=callback())
 else:
     st.header("Matching Profiles")
     st.text("Here you can find your 5 best matches!")
 
-    find_matches()
+    df_me = loadMe()
+    likes_dislikes = load_likes_dislikes(st.session_state['user_ID'])
+
+    if not df_me.iloc[0]['gender'] or not df_me.iloc[0]['gender_other']:
+        st.warning("You must complete your profile before proceeding. Remember also to confirm your intos!")
+    elif 'matches_found' not in st.session_state or not st.session_state['matches_found']:
+        with st.form(key='matches_form'):
+            submit_button = st.form_submit_button(label='Find Matches', on_click=callback, type="primary", icon="😍", use_container_width=True)
+    else:
+        find_matches(df_me, likes_dislikes)

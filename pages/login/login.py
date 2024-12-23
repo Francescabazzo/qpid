@@ -32,9 +32,9 @@ def login():
                 conn.close()
 
         with st.form(key='login_form'):
-            input_username = st.text_input('Username', key="username", )
-            input_password = st.text_input('Password', key="password", type="password")
+            st.text_input('Username', key="username", )
+            st.text_input('Password', key="password", type="password")
 
-            submit_button = st.form_submit_button(label='Login', on_click=form_callback)
+            st.form_submit_button(label='Login', on_click=form_callback)
     else:
         st.success("You are logged in! You can navigate to other pages", icon="💚")

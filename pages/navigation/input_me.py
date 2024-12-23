@@ -11,7 +11,7 @@ from utils.converters import gender_text2num
 
 def load_from_db():
     try:
-        df = pd.read_sql(f"SELECT * from profiles WHERE ID='{st.session_state['user_ID']}'", connect2db())
+        df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{st.session_state['user_ID']}'", connect2db())
 
         return df.iloc[0]
     except Error as e:
@@ -55,6 +55,28 @@ def load_to_db(data):
                  f"WHERE ID='{st.session_state['user_ID']}'")
 
         cursor.execute(query)
+
+        if data['same_interests']:
+            query = (f"UPDATE intos SET "
+                     f"sports='{data['sports']}',"
+                     f"tv_sports='{data['tv_sports']}',"
+                     f"exercise='{data['exercise']}',"
+                     f"dining='{data['dining']}',"
+                     f"art='{data['art']}',"
+                     f"hiking='{data['hiking']}',"
+                     f"gaming='{data['gaming']}',"
+                     f"clubbing='{data['clubbing']}',"
+                     f"reading='{data['reading']}',"
+                     f"tv='{data['tv']}',"
+                     f"theater='{data['theater']}',"
+                     f"movies='{data['movies']}',"
+                     f"music='{data['music']}',"
+                     f"shopping='{data['shopping']}',"
+                     f"yoga='{data['yoga']}'"
+                     f"WHERE ID='{st.session_state['user_ID']}'")
+
+            cursor.execute(query)
+
         conn.commit()
 
         st.success("Your profile was correctly updated")
@@ -68,6 +90,8 @@ def input_me():
     data = {}
 
     user = load_from_db()
+
+    data['same_interests'] = user['same_interests']
 
     st.header("My Profile:")
 
