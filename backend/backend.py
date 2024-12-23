@@ -88,7 +88,7 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
 
 def calculate_scores(candidates:pd.DataFrame, search:pd.DataFrame) -> np.ndarray:
     c = candidates.to_numpy()
-    s = search.to_numpy()
+    s = search.to_numpy()[0]
     scores = np.absolute(c[:,7:7+20]-s[np.r_[33:33+5, 39:39+15]])
     scores[:,:5] = c[:,7:7+5]
     scores[:,5:] = 10-scores[:,5:]

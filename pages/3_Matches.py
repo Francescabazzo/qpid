@@ -7,8 +7,8 @@ from mysql.connector import Error
 from utils.db_connection import connect2db
 from utils.converters import gender_num2text
 from utils.utils import calcLatLonRange
-from backend.backend import get_matches
-from utils.db_utils import load_likes_dislikes
+from backend.backend import get_matches, calculate_scores
+from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
 
 st.set_page_config(
     page_title='QPID - Matches',
@@ -59,16 +59,6 @@ def loadProfiles(user, likes_dislikes):
     dislikes = likes_dislikes[likes_dislikes['like_dislike'] == 0]['ID_other'].tolist()
 
     return df[~df['ID'].isin(dislikes)]
-
-
-def loadMatches(matches):
-    matches_list = ', '.join(map(str, matches))
-
-    df = pd.read_sql(
-        f"SELECT * from full_profiles WHERE ID IN ({matches_list}) ORDER BY CASE ID {' '.join([f'WHEN {_id} THEN {i}' for i, _id in enumerate(matches)])} ELSE {len(matches)} END",
-        connect2db())
-
-    return df
 
 
 @st.dialog("User details", width="large")
@@ -146,8 +136,9 @@ def profile_card(user, accuracy_score, likes_dislikes):
 
 def find_matches(df_me, likes_dislikes):
     df_intos = loadProfiles(df_me, likes_dislikes)
-    matches, accuracy_scores = get_matches(df_intos, df_me)
-    df_matches = loadMatches(matches)
+    matches = get_matches(df_intos, df_me)
+    df_matches = load_profiles_from_ids(matches)
+    accuracy_scores = calculate_scores(df_matches, df_me)
 
     for index, row in df_matches.iterrows():
         profile_card(row, accuracy_scores[index], likes_dislikes)
