@@ -71,20 +71,9 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     nn = NearestNeighbors(n_jobs=-1)
     nn.fit(X[:-1])
     idxs = nn.kneighbors(X[-1].reshape(1,-1), return_distance=False, n_neighbors=5)
-    
-    """# ---Calculate Scores---
-    # Variable de-deformation
-    for cnt, i in enumerate(range(3,8)):
-        X[:-1,i] = 11-np.float_power((X[:-1,i]), 1/deformation_exps[characteristic_weights[cnt]-1])
-
-    scores = np.absolute(X[idxs[0]]-X[-1])[:,3:]
-    scores[:,5:] = 10-scores[:,5:]
-    score_weights = np.ones(scores.shape[1])
-    score_weights[:5] = characteristic_weights
-    scores = np.average(scores, axis=1, weights=score_weights)*10"""
 
     # ---Result---
-    return IDs[idxs[0]]#, scores
+    return IDs[idxs[0]]
 
 def calculate_scores(candidates:pd.DataFrame, search:pd.DataFrame) -> np.ndarray:
     c = candidates.to_numpy()
