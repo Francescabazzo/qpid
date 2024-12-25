@@ -110,7 +110,7 @@ def input_other():
         data['distance_flag'] = st.checkbox("Partners close to you", key="distance_flag", value=intos['distance_flag'])
 
         if data['distance_flag']:
-            data['distance_km'] = st.slider("MAX Distance in km", key="distance_km", min_value=10, max_value=100,
+            data['distance_km'] = st.slider("MAX Distance in km", key="distance_km", min_value=10, max_value=1000,
                                             value=(intos['distance_km'] if intos['distance_km'] else 10), step=10)
         else:
             data['distance_km'] = 0
