@@ -5,7 +5,7 @@ import pandas as pd
 from mysql.connector import Error
 
 from utils.db_connection import connect2db
-from utils.converters import gender_num2text
+from utils.converters import pronoun_num2text
 from utils.utils import calcLatLonRange
 from backend.backend import get_matches, calculate_scores
 from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
@@ -106,7 +106,7 @@ def profile_card(user, accuracy_score, likes_dislikes):
         with tab2:
             st.write(f"**Name**: {user['name']}")
             st.write(f"**Age**: {user['age']}")
-            st.write(f"**Gender**: {gender_num2text(user['gender'])}")
+            st.write(f"**Pronouns**: {pronoun_num2text(user['gender'])}")
             st.write(f"**Bio**: *{user['bio']}*")
 
         geo_map = folium.Map(location=[user['latitude'], user['longitude']], zoom_start=9)

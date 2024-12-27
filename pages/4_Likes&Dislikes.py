@@ -1,7 +1,7 @@
 import streamlit as st
 from mysql.connector import Error
 from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
-from utils.converters import gender_num2text
+from utils.converters import pronoun_num2text
 from utils.db_connection import connect2db
 import pandas as pd
 
@@ -22,7 +22,7 @@ def load_likes(likes_dislikes) :
         likes['is_match'].replace(1, "The user liked your profile too! 🤩", inplace=True)
         likes['is_match'].replace(0, "", inplace=True)
 
-        profiles['gender'] = profiles['gender'].apply(gender_num2text)
+        profiles['gender'] = profiles['gender'].apply(pronoun_num2text)
 
         likes = likes.reset_index(drop=True)
         profiles = profiles.reset_index(drop=True)
@@ -39,7 +39,7 @@ def load_dislikes(likes_dislikes) :
     else:
         profiles = load_profiles_from_ids(dislikes['ID_other'].tolist())
 
-        profiles['gender'] = profiles['gender'].apply(gender_num2text)
+        profiles['gender'] = profiles['gender'].apply(pronoun_num2text)
 
         profiles = profiles.reset_index(drop=True)
 

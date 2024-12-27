@@ -6,7 +6,7 @@ import pandas as pd
 from mysql.connector import Error
 from utils.db_connection import connect2db
 
-from utils.converters import gender_text2num
+from utils.converters import pronoun_text2num
 
 
 def load_from_db():
@@ -28,7 +28,7 @@ def load_to_db(data):
         query = (f"UPDATE profiles SET "
                  f"name='{data['name']}',"
                  f"bio='{data['bio']}',"
-                 f"gender='{gender_text2num(data['gender'])}',"
+                 f"gender='{pronoun_text2num(data['gender'])}',"
                  f"age='{data['age']}',"
                  f"longitude='{data['longitude']}',"
                  f"latitude='{data['latitude']}',"
@@ -111,7 +111,7 @@ def input_me():
     tab1, tab2 = st.columns(2, gap='large')
 
     with tab1:
-        data['gender'] = st.radio("Gender", ["Male", "Female", ":rainbow[Other]"], key="gender",
+        data['gender'] = st.radio("How do you identify yourself?", ["He/Him", "She/Her", ":rainbow[They/Them]"], key="gender",
                           index=((int(user['gender']) - 1) if user['gender'] else 0))
 
         data['age'] = st.number_input("Age", key="age", min_value=18, max_value=99, step=1,
