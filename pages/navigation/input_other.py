@@ -49,7 +49,7 @@ def load_to_db(data):
                       f"movies='{data['movies']}',"
                       f"music='{data['music']}',"
                       f"shopping='{data['shopping']}',"
-                      f"yoga='{data['yoga']}'")
+                      f"yoga='{data['yoga']}', ")
         else:
             query += (f"sports=(SELECT sports FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
                       f"tv_sports=(SELECT tv_sports FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
@@ -68,7 +68,7 @@ def load_to_db(data):
                       f"yoga=(SELECT yoga FROM profiles WHERE ID ='{st.session_state['user_ID']}'),")
 
         query += (f"same_interest='{boolean_text2num(data['same_interest'])}' "
-                  f"WHERE ID='{st.session_state['user_ID']}'")
+                  f"WHERE ID={st.session_state['user_ID']} ")
 
         cursor.execute(query)
         conn.commit()
