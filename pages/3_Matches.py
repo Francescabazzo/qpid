@@ -182,7 +182,6 @@ def callback():
     st.session_state['matches_found'] = True
 
 
-#if 'user_login' not in st.session_state:
 if not cookie.get('user_login') :
     st.warning("You must log in to continue!", icon="⚠️")
 

@@ -67,7 +67,6 @@ def callback():
         cursor.execute(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}")
         conn.commit()
 
-        # st.success("The new account has been created!", icon="💚")
     except Error as e:
         st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
     finally:
@@ -75,7 +74,6 @@ def callback():
         conn.close()
 
 
-# if 'user_login' not in st.session_state:
 if not cookie.get('user_login'):
     st.warning("You must log in to continue!", icon="⚠️")
 

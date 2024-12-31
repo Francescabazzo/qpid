@@ -14,7 +14,6 @@ cookie = CookieController()
 from pages.profile.profile_me import input_me
 from pages.profile.profile_intos import input_other
 
-#if 'user_login' not in st.session_state:
 if not cookie.get('user_login') :
     st.warning("You must log in to continue!", icon="⚠️")
 else:
@@ -52,5 +51,3 @@ else:
 
     for i in range(4):
         st.markdown('#')
-
-    # st.markdown(footer, unsafe_allow_html=True)

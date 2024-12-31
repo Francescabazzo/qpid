@@ -25,7 +25,7 @@ def login_callback():
             cookie.set('user_ID', users[0][0])
 
         else:
-            st.error("Wrong username or password!", icon="❌")  # todo POSIZIONAMENTO ALERT
+            st.error("Wrong username or password!", icon="❌")
     except Error as e:
         st.error(f"An error occurred while reading data from database: {e}", icon="❌")
     finally:

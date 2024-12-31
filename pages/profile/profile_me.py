@@ -8,9 +8,6 @@ from utils.db_connection import connect2db
 
 from utils.converters import pronoun_text2num
 
-#from streamlit_cookies_controller import CookieController
-#cookie = CookieController()
-
 cookie = None
 
 def load_from_db():
@@ -28,9 +25,6 @@ def load_to_db(data):
 
     conn = connect2db()
     cursor = conn.cursor()
-
-    # todo CYBERSEC: castare a INT + castare FLOAT lat/lon + check checkbox + regex per nome
-    # todo + Regex EDI per bio
 
     try:
         query = (f"UPDATE profiles SET "
@@ -197,7 +191,6 @@ def input_me(_cookie):
                          step=1)
     data['yoga'] = st.slider("Yoga", key="yoga", min_value=1, max_value=10, value=(user['yoga'] if user['yoga'] else 5), step=1)
 
-    # todo CAMBIARE PARAMETRI
     if data['name'] and data['bio'] and data['latitude'] and data['longitude']:
         button = False
     else:

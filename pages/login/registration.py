@@ -8,8 +8,6 @@ def registration():
     st.header("Registration:")
     st.markdown("If you don't have an account, you can create one!")
 
-    # st.warning("You must log in to continue!", icon="⚠️")
-
     def form_callback():
         if not st.session_state['reg_username'] or not st.session_state['reg_password'] or not st.session_state[
             'reg_email']:
@@ -21,8 +19,6 @@ def registration():
         else:
             conn = connect2db()
             cursor = conn.cursor()
-
-            # TODO GESTIRE TUTTE CASISTICHE PER NUOVO UTENTE
 
             try:
                 query = f"INSERT INTO users SET username='{st.session_state['reg_username']}', password='{st.session_state['reg_password']}', email='{st.session_state['reg_email']}'"

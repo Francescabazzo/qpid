@@ -3,15 +3,12 @@ import streamlit as st
 import pandas as pd
 from mysql.connector import Error
 
-from pages.login.login import cookie
 from utils.db_connection import connect2db
 
 from utils.converters import gender_text2num, boolean_text2num
 
-#from streamlit_cookies_controller import CookieController
-#cookie = CookieController()
-
 cookie = None
+
 
 def load_from_db():
     global cookie
