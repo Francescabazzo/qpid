@@ -99,7 +99,7 @@ def user_details(user):
 
 def profile_card(user, accuracy_score, likes_dislikes):
     with st.expander(f"{user['name']}", expanded=True):
-        st.progress(text=f"Match Accuracy: {accuracy_score:.2f} %", value=int(accuracy_score))
+        st.progress(text=f"Match Accuracy: {accuracy_score:.1f} %", value=int(accuracy_score))
 
         tab1, tab2 = st.columns([1, 2], gap='large')
 

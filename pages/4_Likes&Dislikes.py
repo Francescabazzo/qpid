@@ -15,16 +15,17 @@ st.set_page_config(
 
 cookie = CookieController()
 
-def load_likes(likes_dislikes) :
+
+def load_likes(likes_dislikes):
     likes = likes_dislikes.loc[likes_dislikes['like_dislike'] == 1]
 
-    if likes.empty :
+    if likes.empty:
         st.warning("No likes yet...")
     else:
         profiles = load_profiles_from_ids(likes['ID_other'].tolist())
 
-        likes['is_match'].replace(1, "The user liked your profile too! 🤩", inplace=True)
-        likes['is_match'].replace(0, "", inplace=True)
+        likes['is_match'] = likes['is_match'].replace(1, "The user liked your profile too! 🤩")
+        likes['is_match'] = likes['is_match'].replace(0, "")
 
         profiles['gender'] = profiles['gender'].apply(pronoun_num2text)
 
@@ -33,12 +34,16 @@ def load_likes(likes_dislikes) :
 
         df = pd.concat([profiles['name'], profiles['age'], profiles['gender'], likes['is_match']], axis=1)
 
+        df.rename(columns={'name': 'Name', 'gender': 'Gender', 'age': 'Age', 'is_match': 'Reciprocal Like'},
+                  inplace=True)
+
         st.table(df)
 
-def load_dislikes(likes_dislikes) :
+
+def load_dislikes(likes_dislikes):
     dislikes = likes_dislikes.loc[likes_dislikes['like_dislike'] == 0]
 
-    if dislikes.empty :
+    if dislikes.empty:
         st.warning("No dislikes yet...")
     else:
         profiles = load_profiles_from_ids(dislikes['ID_other'].tolist())
@@ -49,9 +54,12 @@ def load_dislikes(likes_dislikes) :
 
         df = pd.concat([profiles['name'], profiles['age'], profiles['gender']], axis=1)
 
+        df.rename(columns={'name': 'Name', 'gender': 'Gender', 'age': 'Age'}, inplace=True)
+
         st.table(df)
 
-def callback() :
+
+def callback():
     conn = connect2db()
     cursor = conn.cursor()
 
@@ -59,15 +67,16 @@ def callback() :
         cursor.execute(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}")
         conn.commit()
 
-        #st.success("The new account has been created!", icon="💚")
+        # st.success("The new account has been created!", icon="💚")
     except Error as e:
         st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
     finally:
         cursor.close()
         conn.close()
 
-#if 'user_login' not in st.session_state:
-if not cookie.get('user_login') :
+
+# if 'user_login' not in st.session_state:
+if not cookie.get('user_login'):
     st.warning("You must log in to continue!", icon="⚠️")
 
 else:
@@ -86,4 +95,5 @@ else:
     load_dislikes(likes_dislikes)
 
     with st.form(key='reset'):
-        st.form_submit_button(label='Reset Likes & Dislikes', on_click=callback, type="primary", icon="🗑️", use_container_width=True)
+        st.form_submit_button(label='Reset Likes & Dislikes', on_click=callback, type="primary", icon="🗑️",
+                              use_container_width=True)
