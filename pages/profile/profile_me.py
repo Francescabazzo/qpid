@@ -11,8 +11,11 @@ from utils.converters import pronoun_text2num
 #from streamlit_cookies_controller import CookieController
 #cookie = CookieController()
 
+cookie = None
 
-def load_from_db(cookie):
+def load_from_db():
+    global cookie
+
     try:
         df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", connect2db())
 
@@ -20,7 +23,9 @@ def load_from_db(cookie):
     except Error as e:
         st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
-def load_to_db(cookie, data):
+def load_to_db(data):
+    global cookie
+
     conn = connect2db()
     cursor = conn.cursor()
 
@@ -89,10 +94,13 @@ def load_to_db(cookie, data):
         cursor.close()
         conn.close()
 
-def input_me(cookie):
+def input_me(_cookie):
+    global cookie
+    cookie = _cookie
+
     data = {}
 
-    user = load_from_db(cookie)
+    user = load_from_db()
 
     data['same_interests'] = user['same_interests']
 
@@ -196,4 +204,4 @@ def input_me(cookie):
         button = True
 
     if st.button("Save", use_container_width=True, disabled=button):
-        load_to_db(cookie, data)
+        load_to_db(data)

@@ -2,6 +2,8 @@ import streamlit as st
 
 import pandas as pd
 from mysql.connector import Error
+
+from pages.login.login import cookie
 from utils.db_connection import connect2db
 
 from utils.converters import gender_text2num, boolean_text2num
@@ -9,7 +11,11 @@ from utils.converters import gender_text2num, boolean_text2num
 #from streamlit_cookies_controller import CookieController
 #cookie = CookieController()
 
-def load_from_db(cookie):
+cookie = None
+
+def load_from_db():
+    global cookie
+
     try:
         df = pd.read_sql(f"SELECT * from intos WHERE ID='{cookie.get('user_ID')}'", connect2db())
 
@@ -18,7 +24,9 @@ def load_from_db(cookie):
         st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
 
-def load_to_db(cookie, data):
+def load_to_db(data):
+    global cookie
+
     conn = connect2db()
     cursor = conn.cursor()
 
@@ -83,10 +91,13 @@ def load_to_db(cookie, data):
         conn.close()
 
 
-def input_other(cookie):
+def input_other(_cookie):
+    global cookie
+    cookie = _cookie
+
     data = {}
 
-    intos = load_from_db(cookie)
+    intos = load_from_db()
 
     st.header("What are you looking for?")
 
@@ -177,4 +188,4 @@ def input_other(cookie):
                                      value=(intos['yoga'] if intos['yoga'] else 5), step=1)
 
     if st.button("Save", use_container_width=True):
-        load_to_db(cookie, data)
+        load_to_db(data)
