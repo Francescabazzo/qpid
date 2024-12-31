@@ -24,17 +24,19 @@ def load_likes(likes_dislikes):
     else:
         profiles = load_profiles_from_ids(likes['ID_other'].tolist())
 
-        likes['is_match'] = likes['is_match'].replace(1, "The user liked your profile too! 🤩")
-        likes['is_match'] = likes['is_match'].replace(0, "")
-
-        profiles['gender'] = profiles['gender'].apply(pronoun_num2text)
-
         likes = likes.reset_index(drop=True)
         profiles = profiles.reset_index(drop=True)
 
-        df = pd.concat([profiles['name'], profiles['age'], profiles['gender'], likes['is_match']], axis=1)
+        df = pd.concat([profiles['name'], profiles['age'], profiles['gender'], likes['is_match'], profiles['email']], axis=1)
 
-        df.rename(columns={'name': 'Name', 'gender': 'Gender', 'age': 'Age', 'is_match': 'Reciprocal Like'},
+        df['email'] = df['email'].where(df['is_match'] == 1, "")
+
+        df['is_match'] = df['is_match'].replace(1, "The user liked your profile too! 🤩")
+        df['is_match'] = df['is_match'].replace(0, "This user have not liked your profile (so far...)")
+
+        df['gender'] = df['gender'].apply(pronoun_num2text)
+
+        df.rename(columns={'name': 'Name', 'gender': 'Gender', 'age': 'Age', 'is_match': 'Reciprocal Like', 'email': 'Email'},
                   inplace=True)
 
         st.table(df)
@@ -48,11 +50,11 @@ def load_dislikes(likes_dislikes):
     else:
         profiles = load_profiles_from_ids(dislikes['ID_other'].tolist())
 
-        profiles['gender'] = profiles['gender'].apply(pronoun_num2text)
-
         profiles = profiles.reset_index(drop=True)
 
         df = pd.concat([profiles['name'], profiles['age'], profiles['gender']], axis=1)
+
+        df['gender'] = df['gender'].apply(pronoun_num2text)
 
         df.rename(columns={'name': 'Name', 'gender': 'Gender', 'age': 'Age'}, inplace=True)
 
@@ -84,6 +86,7 @@ else:
     st.text("Here you can find all the profile that you liked or disliked!")
 
     st.subheader("Profiles that you LIKED")
+    st.markdown("Notice that in case of a **RECIPROCAL LIKE** the E-Mail address of the other user will become visible to you, so you can start know each other better!")
 
     load_likes(likes_dislikes)
 
