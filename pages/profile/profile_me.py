@@ -8,16 +8,19 @@ from utils.db_connection import connect2db
 
 from utils.converters import pronoun_text2num
 
+#from streamlit_cookies_controller import CookieController
+#cookie = CookieController()
 
-def load_from_db():
+
+def load_from_db(cookie):
     try:
-        df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{st.session_state['user_ID']}'", connect2db())
+        df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", connect2db())
 
         return df.iloc[0]
     except Error as e:
         st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
-def load_to_db(data):
+def load_to_db(cookie, data):
     conn = connect2db()
     cursor = conn.cursor()
 
@@ -52,7 +55,7 @@ def load_to_db(data):
                  f"music='{data['music']}',"
                  f"shopping='{data['shopping']}',"
                  f"yoga='{data['yoga']}'"
-                 f"WHERE ID='{st.session_state['user_ID']}'")
+                 f"WHERE ID='{cookie.get('user_ID')}'")
 
         cursor.execute(query)
 
@@ -73,7 +76,7 @@ def load_to_db(data):
                      f"music='{data['music']}',"
                      f"shopping='{data['shopping']}',"
                      f"yoga='{data['yoga']}'"
-                     f"WHERE ID='{st.session_state['user_ID']}'")
+                     f"WHERE ID='{cookie.get('user_ID')}'")
 
             cursor.execute(query)
 
@@ -86,10 +89,10 @@ def load_to_db(data):
         cursor.close()
         conn.close()
 
-def input_me():
+def input_me(cookie):
     data = {}
 
-    user = load_from_db()
+    user = load_from_db(cookie)
 
     data['same_interests'] = user['same_interests']
 
@@ -193,4 +196,4 @@ def input_me():
         button = True
 
     if st.button("Save", use_container_width=True, disabled=button):
-        load_to_db(data)
+        load_to_db(cookie, data)

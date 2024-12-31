@@ -10,22 +10,25 @@ from utils.utils import calcLatLonRange
 from backend.backend import get_matches, calculate_scores
 from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
 
+from streamlit_cookies_controller import CookieController
+
 st.set_page_config(
     page_title='QPID - Matches',
     page_icon="utils/logo.png",
     initial_sidebar_state="expanded"
 )
 
+cookie = CookieController()
 
 def loadMe():
-    df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{st.session_state['user_ID']}'", connect2db())
+    df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", connect2db())
 
     return df
 
 
 def loadProfiles(user, likes_dislikes):
     user = user.iloc[0]
-    query = f"SELECT * FROM full_profiles WHERE ID <> {st.session_state['user_ID']} "
+    query = f"SELECT * FROM full_profiles WHERE ID <> {cookie.get('user_ID')} "
     if user['age_flag_other'] == 1:
         query += f"AND age >= {user['age_other'] - user['age_radius_other']} AND age <= {user['age_other'] + user['age_radius_other']} "
 
@@ -127,11 +130,11 @@ def profile_card(user, accuracy_score, likes_dislikes):
         else:
             with btn2:
                 if st.button("LIKE", icon="👍", key=f"like_{user['ID']}"):
-                    set_like_dislike(st.session_state['user_ID'], user['ID'], 1)
+                    set_like_dislike(cookie.get('user_ID'), user['ID'], 1)
 
             with btn3:
                 if st.button("DISLIKE", icon="👎", key=f"dislike_{user['ID']}"):
-                    set_like_dislike(st.session_state['user_ID'], user['ID'], 0)
+                    set_like_dislike(cookie.get('user_ID'), user['ID'], 0)
 
 
 def find_matches(df_me, likes_dislikes):
@@ -179,7 +182,8 @@ def callback():
     st.session_state['matches_found'] = True
 
 
-if 'user_login' not in st.session_state:
+#if 'user_login' not in st.session_state:
+if not cookie.get('user_login') :
     st.warning("You must log in to continue!", icon="⚠️")
 
 else:
@@ -187,7 +191,7 @@ else:
     st.text("Here you can find your 5 best matches!")
 
     df_me = loadMe()
-    likes_dislikes = load_likes_dislikes(st.session_state['user_ID'])
+    likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
 
     if not df_me.iloc[0]['gender'] or not df_me.iloc[0]['gender_other']:
         st.warning("You must complete your profile before proceeding. Remember also to confirm your intos!")

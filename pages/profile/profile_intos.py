@@ -6,17 +6,19 @@ from utils.db_connection import connect2db
 
 from utils.converters import gender_text2num, boolean_text2num
 
+#from streamlit_cookies_controller import CookieController
+#cookie = CookieController()
 
-def load_from_db():
+def load_from_db(cookie):
     try:
-        df = pd.read_sql(f"SELECT * from intos WHERE ID='{st.session_state['user_ID']}'", connect2db())
+        df = pd.read_sql(f"SELECT * from intos WHERE ID='{cookie.get('user_ID')}'", connect2db())
 
         return df.iloc[0]
     except Error as e:
         st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
 
-def load_to_db(data):
+def load_to_db(cookie, data):
     conn = connect2db()
     cursor = conn.cursor()
 
@@ -51,24 +53,24 @@ def load_to_db(data):
                       f"shopping='{data['shopping']}',"
                       f"yoga='{data['yoga']}', ")
         else:
-            query += (f"sports=(SELECT sports FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"tv_sports=(SELECT tv_sports FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"exercise=(SELECT exercise FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"dining=(SELECT dining FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"art=(SELECT art FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"hiking=(SELECT hiking FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"gaming=(SELECT gaming FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"clubbing=(SELECT clubbing FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"reading=(SELECT reading FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"tv=(SELECT tv FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"theater=(SELECT theater FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"movies=(SELECT movies FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"music=(SELECT music FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"shopping=(SELECT shopping FROM profiles WHERE ID ='{st.session_state['user_ID']}'),"
-                      f"yoga=(SELECT yoga FROM profiles WHERE ID ='{st.session_state['user_ID']}'),")
+            query += (f"sports=(SELECT sports FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"tv_sports=(SELECT tv_sports FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"exercise=(SELECT exercise FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"dining=(SELECT dining FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"art=(SELECT art FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"hiking=(SELECT hiking FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"gaming=(SELECT gaming FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"clubbing=(SELECT clubbing FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"reading=(SELECT reading FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"tv=(SELECT tv FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"theater=(SELECT theater FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"movies=(SELECT movies FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"music=(SELECT music FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"shopping=(SELECT shopping FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                      f"yoga=(SELECT yoga FROM profiles WHERE ID ='{cookie.get('user_ID')}'),")
 
         query += (f"same_interest='{boolean_text2num(data['same_interest'])}' "
-                  f"WHERE ID={st.session_state['user_ID']} ")
+                  f"WHERE ID={cookie.get('user_ID')} ")
 
         cursor.execute(query)
         conn.commit()
@@ -81,10 +83,10 @@ def load_to_db(data):
         conn.close()
 
 
-def input_other():
+def input_other(cookie):
     data = {}
 
-    intos = load_from_db()
+    intos = load_from_db(cookie)
 
     st.header("What are you looking for?")
 
@@ -175,4 +177,4 @@ def input_other():
                                      value=(intos['yoga'] if intos['yoga'] else 5), step=1)
 
     if st.button("Save", use_container_width=True):
-        load_to_db(data)
+        load_to_db(cookie, data)

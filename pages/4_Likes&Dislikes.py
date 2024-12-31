@@ -5,11 +5,15 @@ from utils.converters import pronoun_num2text
 from utils.db_connection import connect2db
 import pandas as pd
 
+from streamlit_cookies_controller import CookieController
+
 st.set_page_config(
     page_title='QPID - Matches',
     page_icon="utils/logo.png",
     initial_sidebar_state="expanded"
 )
+
+cookie = CookieController()
 
 def load_likes(likes_dislikes) :
     likes = likes_dislikes.loc[likes_dislikes['like_dislike'] == 1]
@@ -52,7 +56,7 @@ def callback() :
     cursor = conn.cursor()
 
     try:
-        cursor.execute(f"DELETE FROM likes WHERE ID = {st.session_state['user_ID']}")
+        cursor.execute(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}")
         conn.commit()
 
         #st.success("The new account has been created!", icon="💚")
@@ -62,11 +66,12 @@ def callback() :
         cursor.close()
         conn.close()
 
-if 'user_login' not in st.session_state:
+#if 'user_login' not in st.session_state:
+if not cookie.get('user_login') :
     st.warning("You must log in to continue!", icon="⚠️")
 
 else:
-    likes_dislikes = load_likes_dislikes(st.session_state['user_ID'])
+    likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
 
     st.header("Likes and Dislikes")
     st.text("Here you can find all the profile that you liked or disliked!")

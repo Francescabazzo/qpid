@@ -8,3 +8,4 @@ pandas~=2.2.3
 streamlit-aggrid~=1.0.5
 scipy~=1.14.1
 scikit-learn~=1.6.0
+streamlit_cookies_controller~=0.0.4

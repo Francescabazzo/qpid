@@ -1,18 +1,14 @@
 import streamlit as st
 import hydralit_components as hc
 
-from pages.login.login import login
-from pages.login.registration import registration
-
-# from streamlit_modal import Modal
-
-# from utils.components import footer_style, footer
-
 st.set_page_config(
     page_title='QPID - Homepage',
     page_icon="utils/logo.png",
     initial_sidebar_state="expanded"
 )
+
+from pages.login.login import login
+from pages.login.registration import registration
 
 # ===== MAIN PAGE =====
 

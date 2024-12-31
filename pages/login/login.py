@@ -1,12 +1,15 @@
 import streamlit as st
 from mysql.connector import Error
 from utils.db_connection import connect2db
+from streamlit_cookies_controller import CookieController
 
+cookie = CookieController()
 
 def login():
     st.header("Login:")
 
-    if 'user_login' not in st.session_state:
+    #if 'user_login' not in st.session_state:
+    if not cookie.get('user_login') :
         st.warning("You must log in to continue!", icon="⚠️")
 
         def form_callback():
@@ -21,8 +24,12 @@ def login():
                 users = cursor.fetchall()
 
                 if len(users):
-                    st.session_state['user_login'] = st.session_state['username']
-                    st.session_state['user_ID'] = users[0][0]
+                    #st.session_state['user_login'] = st.session_state['username']
+                    #st.session_state['user_ID'] = users[0][0]
+
+                    cookie.set('user_login', st.session_state['username'])
+                    cookie.set('user_ID', users[0][0])
+
                 else:
                     st.error("Wrong username or password!", icon="❌")  # todo POSIZIONAMENTO ALERT
             except Error as e:

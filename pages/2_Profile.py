@@ -1,17 +1,7 @@
 import hydralit_components as hc
 import streamlit as st
-# import streamlit_analytics
-# from streamlit_modal import Modal
-# import streamlit_lottie
-import time
-import json
 
-# from utils.components import footer_style, footer
-
-from pages.navigation.input_me import input_me
-from pages.navigation.input_other import input_other
-
-import os
+from streamlit_cookies_controller import CookieController
 
 st.set_page_config(
     page_title='QPID - Profile',
@@ -19,14 +9,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-if 'user_login' not in st.session_state:
+cookie = CookieController()
+
+from pages.profile.profile_me import input_me
+from pages.profile.profile_intos import input_other
+
+#if 'user_login' not in st.session_state:
+if not cookie.get('user_login') :
     st.warning("You must log in to continue!", icon="⚠️")
 else:
-    # Footer
-
-    # st.markdown(footer_style, unsafe_allow_html=True)
-
-    # NavBar
 
     INPUT_ME = 'My Profile'
     INPUT_OTHER = 'My Interests'
@@ -54,10 +45,10 @@ else:
         horizontal_orientation=True)
 
     if chosen_tab == INPUT_ME:
-        input_me()
+        input_me(cookie)
 
     elif chosen_tab == INPUT_OTHER:
-        input_other()
+        input_other(cookie)
 
     for i in range(4):
         st.markdown('#')
