@@ -20,6 +20,7 @@ st.set_page_config(
 
 cookie = CookieController()
 
+
 def loadMe():
     df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", connect2db())
 
@@ -182,12 +183,16 @@ def callback():
     st.session_state['matches_found'] = True
 
 
-if not cookie.get('user_login') :
+if not cookie.get('user_login'):
     st.warning("You must log in to continue!", icon="⚠️")
 
 else:
     st.header("Matching Profiles")
     st.text("Here you can find your 5 best matches!")
+    st.markdown(
+        "For each profile, you can set a **LIKE** or a **DISLIKE**: "
+        "\n - You can use a **LIKE** to inform the other profile that you are interested in it: if the like is mutual, you can start chat together! "
+        "\n - You can use a **DISLIKE** to remove a profile from the list: at the next search, this profile will not be proposed to you anymore!")
 
     df_me = loadMe()
     likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
