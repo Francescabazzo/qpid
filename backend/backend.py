@@ -4,10 +4,9 @@ from sklearn.cluster import HDBSCAN
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
 
-deformation_exps = [(1/5), (1/1.3), 1, 2, 5]
-
 def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
-    # ---Preparazione (da modificare)---
+    deformation_exps = [(1/5), (1/1.3), 1, 2, 5]
+    
     unnecessary = ["email", "name", "bio", "gender", "gender_other", "age_flag_other",
                    "age_radius_other", "distance_flag_other", "distance_km_other",
                    "same_interests"]
