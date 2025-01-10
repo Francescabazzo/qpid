@@ -32,17 +32,22 @@ def login_callback():
         cursor.close()
         conn.close()
 
-def logout_callback() :
+
+def logout_callback():
     global cookie
 
     cookie.remove('user_login')
+
+    for key in st.session_state.keys():
+        del st.session_state[key]
+
 
 def login():
     global cookie
 
     st.header("Login:")
 
-    if not cookie.get('user_login') :
+    if not cookie.get('user_login'):
         st.warning("You must log in to continue!", icon="⚠️")
 
         with st.form(key='login_form'):
