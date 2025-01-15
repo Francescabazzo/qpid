@@ -6,7 +6,7 @@ from scipy.spatial.distance import cdist
 
 def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     deformation_exps = [(1/5), (1/1.3), 1, 2, 5]
-    
+    is_distance_important = bool(search['distance_flag_other'].values[0])
     unnecessary = ["email", "name", "bio", "gender", "gender_other", "age_flag_other",
                    "age_radius_other", "distance_flag_other", "distance_km_other",
                    "same_interests"]
@@ -68,8 +68,9 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
 
     # ---Nearest Neighbors---
     nn = NearestNeighbors(n_jobs=-1)
-    nn.fit(X[:-1])
-    idxs = nn.kneighbors(X[-1].reshape(1,-1), return_distance=False, n_neighbors=5)
+    selected_features = np.r_[0:23] if is_distance_important else np.r_[0,3:23]
+    nn.fit(X[:-1, selected_features])
+    idxs = nn.kneighbors(X[-1, selected_features].reshape(1,-1), return_distance=False, n_neighbors=5)
 
     # ---Result---
     return IDs[idxs[0]]
