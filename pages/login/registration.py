@@ -14,6 +14,8 @@ def registration():
             st.error("You must fill all fields to continue!", icon="❌")
         elif st.session_state['reg_password'] != st.session_state['reg_password2']:
             st.error("The two passwords do not correspond!", icon="❌")
+        elif not st.session_state['reg_policy'] :
+            st.error("You must accept the policy!", icon="❌")
         elif '@' not in st.session_state['reg_email']:
             st.error("You need to provide a correct email address!", icon="❌")
         else:
@@ -54,5 +56,7 @@ def registration():
         st.text_input('E-Mail', key="reg_email")
         st.text_input('Password', key="reg_password", type="password")
         st.text_input('Repeat Password', key="reg_password2", type="password")
+
+        st.checkbox('I accept to share my email address with other users', key="reg_policy")
 
         st.form_submit_button(label='Create Account', on_click=form_callback)
