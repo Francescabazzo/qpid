@@ -19,6 +19,9 @@ st.markdown(
 st.markdown(
     "Fill the questionnaire and navigate between dozens of people close to your selections: one of them is your perfect match!")
 
+st.info(
+    "**This is a Proof-of-Concept Application!** We do not guarantee security standards, privacy policies compliance and constant bug fixing, so please do not consider using this software as a professional tool.")
+
 # ===== TABS =====
 
 LOGIN = 'Login'
