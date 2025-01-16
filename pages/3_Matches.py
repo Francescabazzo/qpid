@@ -61,8 +61,12 @@ def loadProfiles(user, likes_dislikes):
     # FILTERS OUT DISLIKES
 
     dislikes = likes_dislikes[likes_dislikes['like_dislike'] == 0]['ID_other'].tolist()
+    likes = likes_dislikes[likes_dislikes['like_dislike'] == 1]['ID_other'].tolist()
 
-    return df[~df['ID'].isin(dislikes)]
+    df = df[~df['ID'].isin(dislikes)]
+    df = df[~df['ID'].isin(likes)]
+
+    return df
 
 
 @st.dialog("User details", width="large")
@@ -125,17 +129,13 @@ def profile_card(user, accuracy_score, likes_dislikes):
             if st.button("More Details", icon="🔍", key=user['ID']):
                 user_details(user)
 
-        if not likes_dislikes.loc[(likes_dislikes['ID_other'] == user['ID']), 'like_dislike'].empty:
-            with btn2:
-                st.write(f"You already set a **like** to this profile.")
-        else:
-            with btn2:
-                if st.button("LIKE", icon="👍", key=f"like_{user['ID']}"):
-                    set_like_dislike(cookie.get('user_ID'), user['ID'], 1)
+        with btn2:
+            if st.button("LIKE", icon="👍", key=f"like_{user['ID']}"):
+                set_like_dislike(cookie.get('user_ID'), user['ID'], 1)
 
-            with btn3:
-                if st.button("DISLIKE", icon="👎", key=f"dislike_{user['ID']}"):
-                    set_like_dislike(cookie.get('user_ID'), user['ID'], 0)
+        with btn3:
+            if st.button("DISLIKE", icon="👎", key=f"dislike_{user['ID']}"):
+                set_like_dislike(cookie.get('user_ID'), user['ID'], 0)
 
 
 def find_matches(df_me, likes_dislikes):
