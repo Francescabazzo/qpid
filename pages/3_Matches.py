@@ -188,12 +188,13 @@ if not cookie.get('user_login'):
 
 else:
     st.header("Matching Profiles")
-    st.text("Here you can find your 5 best matches!")
+    st.text("Here you can find your 5 best matches, among all the users that you have not seen yet!")
     st.markdown(
         "For each profile, you can set a **LIKE** or a **DISLIKE**: "
         "\n - You can use a **LIKE** to inform the other profile that you are interested in it: if the like is mutual, you can start chat together! "
         "\n - You can use a **DISLIKE** to remove a profile from the list: at the next search, this profile will not be proposed to you anymore!")
 
+    st.markdown("Please notice that the **match score** could not follow the descending order of the matches proposal, due to the internal calculation mechanism.")
     df_me = loadMe()
     likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
 
