@@ -112,7 +112,7 @@ def profile_card(user, accuracy_score, likes_dislikes):
         tab1, tab2 = st.columns([1, 2], gap='large')
 
         with tab1:
-            st.image("utils/profile_pic.png", width=100)
+            st.image("utils/images/profile_pic.png", width=100)
 
         with tab2:
             st.write(f"**Name**: {user['name']}")
