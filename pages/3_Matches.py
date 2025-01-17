@@ -22,7 +22,6 @@ st.set_page_config(
 
 cookie = CookieController()
 
-
 def loadMe():
     with connect2db_NEW() as conn:
         df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
@@ -149,7 +148,7 @@ def find_matches(df_me, likes_dislikes):
         st.warning("No matches found. Maybe you might want to change your preferences...")
         st.snow()
     else:
-        if df_intos.size < 5:
+        if df_intos.size <= 5:
             matches = df_intos
         else:
             matches = get_matches(df_intos, df_me)
@@ -195,6 +194,7 @@ else:
 
     st.markdown("Please notice that the **match score** could not follow the descending order of the matches proposal, due to the internal calculation mechanism.")
     df_me = loadMe()
+    # todo spostare
     likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
 
     if not df_me.iloc[0]['gender'] or not df_me.iloc[0]['gender_other']:
