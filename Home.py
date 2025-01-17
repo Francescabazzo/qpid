@@ -1,14 +1,13 @@
 import streamlit as st
 import hydralit_components as hc
+from pages.login.login import login
+from pages.login.registration import registration
 
 st.set_page_config(
     page_title='QPID - Homepage',
     page_icon="utils/logo.png",
     initial_sidebar_state="expanded"
 )
-
-from pages.login.login import login
-from pages.login.registration import registration
 
 # ===== MAIN PAGE =====
 
