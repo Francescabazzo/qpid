@@ -6,7 +6,6 @@ from streamlit_cookies_controller import CookieController
 
 cookie = CookieController()
 
-
 def login_callback():
     global cookie
 

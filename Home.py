@@ -1,13 +1,14 @@
 import streamlit as st
 import hydralit_components as hc
-from pages.login.login import login
-from pages.login.registration import registration
 
 st.set_page_config(
     page_title='QPID - Homepage',
     page_icon="utils/logo.png",
     initial_sidebar_state="expanded"
 )
+
+from pages.login.login import login                     # noqa: E402
+from pages.login.registration import registration       # noqa: E402
 
 # ===== MAIN PAGE =====
 
@@ -55,8 +56,6 @@ for i in range(4):
     st.markdown('#')
 
 # ===== SIDEBAR =====
-
-# st.sidebar.image("utils/ChickenAI.png",width=500)
 
 st.sidebar.title("Welcome to QPID!")
 st.sidebar.image("utils/logo.png", width=50)
