@@ -42,18 +42,18 @@ def loadProfiles(user, likes_dislikes):
 
     # GENRES
     cases = {
-        ('1', '1'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '1' AND gender_other = '3'))",
-        ('1', '2'): f"AND ((gender = '2' AND gender_other = '1') OR (gender = '2' AND gender_other = '3'))",
+        ('1', '1'): "AND ((gender = '1' AND gender_other = '1') OR (gender = '1' AND gender_other = '3'))",
+        ('1', '2'): "AND ((gender = '2' AND gender_other = '1') OR (gender = '2' AND gender_other = '3'))",
         ('1',
-         '3'): f"AND ((gender = '1' AND gender_other = '1') OR (gender = '2' AND gender_other = '1')OR (gender = '3' AND gender_other = '1')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
-        ('2', '1'): f"AND ((gender = '1' AND gender_other = '2') OR (gender = '1' AND gender_other = '3'))",
-        ('2', '2'): f"AND ((gender = '2' AND gender_other = '2') OR (gender = '2' AND gender_other = '3'))",
+         '3'): "AND ((gender = '1' AND gender_other = '1') OR (gender = '2' AND gender_other = '1')OR (gender = '3' AND gender_other = '1')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+        ('2', '1'): "AND ((gender = '1' AND gender_other = '2') OR (gender = '1' AND gender_other = '3'))",
+        ('2', '2'): "AND ((gender = '2' AND gender_other = '2') OR (gender = '2' AND gender_other = '3'))",
         ('2',
-         '3'): f"AND ((gender = '1' AND gender_other = '2') OR (gender = '2' AND gender_other = '2')OR (gender = '3' AND gender_other = '2')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
-        ('3', '1'): f"AND (gender = '1' AND gender_other = '3')",
-        ('3', '2'): f"AND (gender = '2' AND gender_other = '3')",
+         '3'): "AND ((gender = '1' AND gender_other = '2') OR (gender = '2' AND gender_other = '2')OR (gender = '3' AND gender_other = '2')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+        ('3', '1'): "AND (gender = '1' AND gender_other = '3')",
+        ('3', '2'): "AND (gender = '2' AND gender_other = '3')",
         ('3',
-         '3'): f"AND ((gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
+         '3'): "AND ((gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
     }
 
     query += cases.get((user['gender'], user['gender_other']), "")

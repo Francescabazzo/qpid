@@ -1,5 +1,3 @@
-from sqlalchemy.exc import DBAPIError as exc
-from sqlalchemy import text
 from utils.db_connection import connect2db_NEW
 
 import pandas as pd

@@ -100,7 +100,7 @@ def input_me(_cookie):
 
     st.header("My Profile:")
 
-    cur_photo = st.image("utils/profile_pic.png", width=100)
+    st.image("utils/profile_pic.png", width=100)
 
     data['name'] = st.text_input("Name", key="name", placeholder="Enter your first name", value=user['name'])
 
