@@ -1,5 +1,5 @@
 from backend import get_matches, calculate_scores
-import pickle
+import dill as pickle
 
 def main():
     with open('get_matches.pkl', 'wb') as f:
