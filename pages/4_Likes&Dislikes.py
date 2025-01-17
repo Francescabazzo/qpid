@@ -1,13 +1,11 @@
 import streamlit as st
-from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
-from utils.converters import pronoun_num2text
+from streamlit_cookies_controller import CookieController
+import pandas as pd
+from utils.db_connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
-
-from utils.db_connection import connect2db
-import pandas as pd
-
-from streamlit_cookies_controller import CookieController
+from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
+from utils.converters import pronoun_num2text
 
 st.set_page_config(
     page_title='QPID - Matches',
@@ -15,11 +13,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ====================
+
 cookie = CookieController()
 
 
-def load_likes(likes_dislikes):
-    likes = likes_dislikes.loc[likes_dislikes['like_dislike'] == 1]
+# ===== UTILS FUNCTIONS =====
+
+def load_likes(_likes_dislikes):
+    likes = _likes_dislikes.loc[_likes_dislikes['like_dislike'] == 1]
 
     if likes.empty:
         st.warning("No likes yet...")
@@ -29,7 +31,8 @@ def load_likes(likes_dislikes):
         likes = likes.reset_index(drop=True)
         profiles = profiles.reset_index(drop=True)
 
-        df = pd.concat([profiles['name'], profiles['age'], profiles['gender'], likes['is_match'], profiles['email']], axis=1)
+        df = pd.concat([profiles['name'], profiles['age'], profiles['gender'], likes['is_match'], profiles['email']],
+                       axis=1)
 
         df['email'] = df['email'].where(df['is_match'] == 1, "")
 
@@ -38,14 +41,15 @@ def load_likes(likes_dislikes):
 
         df['gender'] = df['gender'].apply(pronoun_num2text)
 
-        df.rename(columns={'name': 'Name', 'gender': 'Gender', 'age': 'Age', 'is_match': 'Reciprocal Like', 'email': 'Email'},
-                  inplace=True)
+        df.rename(
+            columns={'name': 'Name', 'gender': 'Gender', 'age': 'Age', 'is_match': 'Reciprocal Like', 'email': 'Email'},
+            inplace=True)
 
         st.table(df)
 
 
-def load_dislikes(likes_dislikes):
-    dislikes = likes_dislikes.loc[likes_dislikes['like_dislike'] == 0]
+def load_dislikes(_likes_dislikes):
+    dislikes = _likes_dislikes.loc[_likes_dislikes['like_dislike'] == 0]
 
     if dislikes.empty:
         st.warning("No dislikes yet...")
@@ -63,6 +67,9 @@ def load_dislikes(likes_dislikes):
         st.table(df)
 
 
+# ===== END of UTILS FUNCTIONS =====
+# ===== CALLBACK =====
+
 def callback():
     with connect2db() as conn:
         try:
@@ -73,9 +80,11 @@ def callback():
             st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
 
 
+# ===== END of CALLBACK =====
+# ===== MAIN PAGE =====
+
 if not cookie.get('user_login'):
     st.warning("You must log in to continue!", icon="⚠️")
-
 else:
     likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
 
@@ -83,7 +92,8 @@ else:
     st.text("Here you can find all the profile that you liked or disliked!")
 
     st.subheader("Profiles that you LIKED")
-    st.markdown("Notice that in case of a **RECIPROCAL LIKE** the E-Mail address of the other user will become visible to you, so you can start know each other better!")
+    st.markdown(
+        "Notice that in case of a **RECIPROCAL LIKE** the E-Mail address of the other user will become visible to you, so you can start know each other better!")
 
     load_likes(likes_dislikes)
 
