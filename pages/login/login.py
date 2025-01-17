@@ -1,6 +1,7 @@
 import streamlit as st
-from mysql.connector import Error
-from utils.db_connection import connect2db
+from sqlalchemy.exc import DBAPIError as exc
+from sqlalchemy import text
+from utils.db_connection import connect2db_NEW
 from streamlit_cookies_controller import CookieController
 
 cookie = CookieController()
@@ -9,28 +10,19 @@ cookie = CookieController()
 def login_callback():
     global cookie
 
-    conn = connect2db()
-    cursor = conn.cursor()
+    with connect2db_NEW() as conn:
+        try:
+            query = f"SELECT ID, username from users WHERE username='{st.session_state['username']}' AND password='{st.session_state['password']}'"
 
-    try:
-        query = f"SELECT ID, username from users WHERE username='{st.session_state['username']}' AND password='{st.session_state['password']}'"
+            users = conn.execute(text(query)).fetchall()
 
-        cursor.execute(query)
-
-        users = cursor.fetchall()
-
-        if len(users):
-
-            cookie.set('user_login', st.session_state['username'])
-            cookie.set('user_ID', users[0][0])
-
-        else:
-            st.error("Wrong username or password!", icon="❌")
-    except Error as e:
-        st.error(f"An error occurred while reading data from database: {e}", icon="❌")
-    finally:
-        cursor.close()
-        conn.close()
+            if len(users):
+                cookie.set('user_login', st.session_state['username'])
+                cookie.set('user_ID', users[0][0])
+            else:
+                st.error("Wrong username or password!", icon="❌")
+        except exc as e:
+            st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
 
 def logout_callback():

@@ -1,7 +1,8 @@
 import streamlit as st
-from mysql.connector import Error
+from sqlalchemy.exc import DBAPIError as exc
+from sqlalchemy import text
 
-from utils.db_connection import connect2db
+from utils.db_connection import connect2db_NEW
 
 
 def registration():
@@ -19,37 +20,32 @@ def registration():
         elif '@' not in st.session_state['reg_email']:
             st.error("You need to provide a correct email address!", icon="❌")
         else:
-            conn = connect2db()
-            cursor = conn.cursor()
+            with connect2db_NEW() as conn:
+                try:
+                    query = f"INSERT INTO users SET username='{st.session_state['reg_username']}', password='{st.session_state['reg_password']}', email='{st.session_state['reg_email']}'"
 
-            try:
-                query = f"INSERT INTO users SET username='{st.session_state['reg_username']}', password='{st.session_state['reg_password']}', email='{st.session_state['reg_email']}'"
+                    conn.execute(text(query))
 
-                cursor.execute(query)
-                conn.commit()
+                    # Creates entries in the other DB tables
 
-                # Creates entries in the other DB tables
+                    query = f"SELECT ID FROM users WHERE username='{st.session_state['reg_username']}'"
 
-                query = f"SELECT ID FROM users WHERE username='{st.session_state['reg_username']}'"
+                    user_id = conn.execute(text(query)).fetchall()[0][0]
 
-                cursor.execute(query)
-                user_id = cursor.fetchall()[0][0]
+                    query2 = f"INSERT INTO profiles SET ID='{user_id}'"
+                    query3 = f"INSERT INTO intos SET ID='{user_id}'"
 
-                query2 = f"INSERT INTO profiles SET ID='{user_id}'"
-                query3 = f"INSERT INTO intos SET ID='{user_id}'"
+                    conn.execute(text(query2))
+                    conn.execute(text(query3))
 
-                cursor.execute(query2)
-                cursor.execute(query3)
-                conn.commit()
+                    conn.commit()
 
-                # -----------
+                    # -----------
 
-                st.success("The new account has been created!", icon="💚")
-            except Error as e:
-                st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
-            finally:
-                cursor.close()
-                conn.close()
+                    st.success("The new account has been created!", icon="💚")
+                except exc as e:
+                    conn.rollback()
+                    st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
 
     with st.form(key='reg_form'):
         st.text_input('Username', key="reg_username")

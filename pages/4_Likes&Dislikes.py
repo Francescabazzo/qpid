@@ -1,8 +1,10 @@
 import streamlit as st
-from mysql.connector import Error
 from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
 from utils.converters import pronoun_num2text
-from utils.db_connection import connect2db
+from sqlalchemy.exc import DBAPIError as exc
+from sqlalchemy import text
+
+from utils.db_connection import connect2db_NEW
 import pandas as pd
 
 from streamlit_cookies_controller import CookieController
@@ -62,18 +64,13 @@ def load_dislikes(likes_dislikes):
 
 
 def callback():
-    conn = connect2db()
-    cursor = conn.cursor()
+    with connect2db_NEW() as conn:
+        try:
+            conn.execute(text(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}"))
+            conn.commit()
 
-    try:
-        cursor.execute(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}")
-        conn.commit()
-
-    except Error as e:
-        st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
-    finally:
-        cursor.close()
-        conn.close()
+        except exc as e:
+            st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
 
 
 if not cookie.get('user_login'):

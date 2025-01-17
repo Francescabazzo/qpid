@@ -1,6 +1,9 @@
 from mysql.connector import connect, Error
 import streamlit as st
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import create_engine
 
+#@st.cache_resource
 def connect2db():
     try:
         # Database: Clever Cloud
@@ -11,11 +14,18 @@ def connect2db():
             password="VqDZ4xcAw4Bu7LialwMm",
             auth_plugin="mysql_native_password"
         )
-        #conn = connect(host="sql7.freesqldatabase.com",user="sql7749843",database="sql7749843",password="fn9x4LYm1e")
-        #conn = connect(host="sql.am-online.it",user="amonline13158",database="amonline13158",password="$Host2022!")
 
         if conn.is_connected():
             return conn
     except Error as e:
+        st.error(f"An error was encountered while connecting to the database: {e}")
+        return None
+
+def connect2db_NEW():
+    try:
+        engine = create_engine("mysql://uwywwwp2ws2f97ds:VqDZ4xcAw4Bu7LialwMm@bxdahcfis71ncmcthutg-mysql.services.clever-cloud.com:3306/bxdahcfis71ncmcthutg")
+
+        return engine.connect()
+    except SQLAlchemyError as e:
         st.error(f"An error was encountered while connecting to the database: {e}")
         return None

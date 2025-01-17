@@ -2,9 +2,11 @@ import streamlit as st
 from streamlit_folium import st_folium
 import folium
 import pandas as pd
-from mysql.connector import Error
+from sqlalchemy.exc import DBAPIError as exc
+from sqlalchemy import text
 
-from utils.db_connection import connect2db
+from utils.db_connection import connect2db_NEW
+
 from utils.converters import pronoun_num2text
 from utils.utils import calcLatLonRange
 from backend.backend import get_matches, calculate_scores
@@ -22,7 +24,8 @@ cookie = CookieController()
 
 
 def loadMe():
-    df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", connect2db())
+    with connect2db_NEW() as conn:
+        df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
 
     return df
 
@@ -56,7 +59,8 @@ def loadProfiles(user, likes_dislikes):
 
     query += cases.get((user['gender'], user['gender_other']), "")
 
-    df = pd.read_sql(query, connect2db())
+    with connect2db_NEW() as conn:
+        df = pd.read_sql(query, conn)
 
     # FILTERS OUT DISLIKES
 
@@ -117,7 +121,7 @@ def profile_card(user, accuracy_score, likes_dislikes):
             st.write(f"**Pronouns**: {pronoun_num2text(user['gender'])}")
             st.write(f"**Bio**: *{user['bio']}*")
 
-        geo_map = folium.Map(location=[user['latitude'], user['longitude']], zoom_start=9)
+        geo_map = folium.Map(location=[user['latitude'], user['longitude']], zoom_start=7, zoom_control=False, dragging=False)
         folium.Marker(location=[user['latitude'], user['longitude']]).add_to(geo_map)
         st_folium(geo_map, width=700, height=200)
 
@@ -147,7 +151,6 @@ def find_matches(df_me, likes_dislikes):
     else:
         if df_intos.size < 5:
             matches = df_intos
-
         else:
             matches = get_matches(df_intos, df_me)
 
@@ -159,24 +162,20 @@ def find_matches(df_me, likes_dislikes):
 
 
 def set_like_dislike(id_me, id_other, like_dislike):
-    conn = connect2db()
-    cursor = conn.cursor()
+    with connect2db_NEW() as conn:
+        try:
+            query = f"INSERT INTO likes SET ID='{id_me}', ID_other='{id_other}', like_dislike='{like_dislike}'"
 
-    try:
-        query = f"INSERT INTO likes SET ID='{id_me}', ID_other='{id_other}', like_dislike='{like_dislike}'"
+            conn.execute(text(query))
+            conn.commit()
 
-        cursor.execute(query)
-        conn.commit()
-
-        if like_dislike:
-            st.balloons()
-        else:
-            st.snow()
-    except Error as e:
-        st.error(f"An error occurred while updating your likes/dislikes in the database: {e}", icon="❌")
-    finally:
-        cursor.close()
-        conn.close()
+            if like_dislike:
+                st.balloons()
+            else:
+                st.snow()
+        except exc as e:
+            conn.rollback()
+            st.error(f"An error occurred while updating your likes/dislikes in the database: {e}", icon="❌")
 
 
 def callback():
@@ -206,3 +205,6 @@ else:
                                                   use_container_width=True)
     else:
         find_matches(df_me, likes_dislikes)
+        with st.form(key='matches_form_reload'):
+            submit_button = st.form_submit_button(label='Reload Matches', on_click=callback, type="primary", icon="🔃",
+                                                  use_container_width=True)

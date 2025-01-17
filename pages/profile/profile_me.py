@@ -3,8 +3,10 @@ from streamlit_folium import st_folium
 import folium
 
 import pandas as pd
-from mysql.connector import Error
-from utils.db_connection import connect2db
+from sqlalchemy.exc import DBAPIError as exc
+from sqlalchemy import text
+
+from utils.db_connection import connect2db_NEW
 
 from utils.converters import pronoun_text2num
 
@@ -13,53 +15,31 @@ cookie = None
 def load_from_db():
     global cookie
 
-    try:
-        df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", connect2db())
-
-        return df.iloc[0]
-    except Error as e:
-        st.error(f"An error occurred while reading data from database: {e}", icon="❌")
+    with connect2db_NEW() as conn:
+        try:
+            df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
+            return df.iloc[0]
+        except exc as e:
+            st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
 def load_to_db(data):
     global cookie
 
-    conn = connect2db()
-    cursor = conn.cursor()
+    with connect2db_NEW() as conn:
 
-    try:
-        query = (f"UPDATE profiles SET "
-                 f"name='{data['name']}',"
-                 f"bio='{data['bio']}',"
-                 f"gender='{pronoun_text2num(data['gender'])}',"
-                 f"age='{data['age']}',"
-                 f"longitude='{data['longitude']}',"
-                 f"latitude='{data['latitude']}',"
-                 f"attractiveness='{data['attractiveness']}',"
-                 f"sincerity='{data['sincerity']}',"
-                 f"intelligence='{data['intelligence']}',"
-                 f"funniness='{data['funniness']}',"
-                 f"ambition='{data['ambition']}',"
-                 f"sports='{data['sports']}',"
-                 f"tv_sports='{data['tv_sports']}',"
-                 f"exercise='{data['exercise']}',"
-                 f"dining='{data['dining']}',"
-                 f"art='{data['art']}',"
-                 f"hiking='{data['hiking']}',"
-                 f"gaming='{data['gaming']}',"
-                 f"clubbing='{data['clubbing']}',"
-                 f"reading='{data['reading']}',"
-                 f"tv='{data['tv']}',"
-                 f"theater='{data['theater']}',"
-                 f"movies='{data['movies']}',"
-                 f"music='{data['music']}',"
-                 f"shopping='{data['shopping']}',"
-                 f"yoga='{data['yoga']}'"
-                 f"WHERE ID='{cookie.get('user_ID')}'")
-
-        cursor.execute(query)
-
-        if data['same_interests']:
-            query = (f"UPDATE intos SET "
+        try:
+            query = (f"UPDATE profiles SET "
+                     f"name='{data['name']}',"
+                     f"bio='{data['bio']}',"
+                     f"gender='{pronoun_text2num(data['gender'])}',"
+                     f"age='{data['age']}',"
+                     f"longitude='{data['longitude']}',"
+                     f"latitude='{data['latitude']}',"
+                     f"attractiveness='{data['attractiveness']}',"
+                     f"sincerity='{data['sincerity']}',"
+                     f"intelligence='{data['intelligence']}',"
+                     f"funniness='{data['funniness']}',"
+                     f"ambition='{data['ambition']}',"
                      f"sports='{data['sports']}',"
                      f"tv_sports='{data['tv_sports']}',"
                      f"exercise='{data['exercise']}',"
@@ -77,16 +57,36 @@ def load_to_db(data):
                      f"yoga='{data['yoga']}'"
                      f"WHERE ID='{cookie.get('user_ID')}'")
 
-            cursor.execute(query)
+            conn.execute(text(query))
 
-        conn.commit()
+            if data['same_interests']:
+                query = (f"UPDATE intos SET "
+                         f"sports='{data['sports']}',"
+                         f"tv_sports='{data['tv_sports']}',"
+                         f"exercise='{data['exercise']}',"
+                         f"dining='{data['dining']}',"
+                         f"art='{data['art']}',"
+                         f"hiking='{data['hiking']}',"
+                         f"gaming='{data['gaming']}',"
+                         f"clubbing='{data['clubbing']}',"
+                         f"reading='{data['reading']}',"
+                         f"tv='{data['tv']}',"
+                         f"theater='{data['theater']}',"
+                         f"movies='{data['movies']}',"
+                         f"music='{data['music']}',"
+                         f"shopping='{data['shopping']}',"
+                         f"yoga='{data['yoga']}'"
+                         f"WHERE ID='{cookie.get('user_ID')}'")
 
-        st.success("Your profile was correctly updated")
-    except Error as e:
-        st.error(f"An error occurred while updating your profile: {e}", icon="❌")
-    finally:
-        cursor.close()
-        conn.close()
+                conn.execute(text(query))
+
+            conn.commit()
+
+            st.success("Your profile was correctly updated")
+        except exc as e:
+            conn.rollback()
+            st.error(f"An error occurred while updating your profile: {e}", icon="❌")
+
 
 def input_me(_cookie):
     global cookie
