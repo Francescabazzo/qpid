@@ -1,16 +1,13 @@
 import streamlit as st
 import hydralit_components as hc
+from pages.login.login import login
+from pages.login.registration import registration
 
 st.set_page_config(
     page_title='QPID - Homepage',
     page_icon="utils/logo.png",
     initial_sidebar_state="expanded"
 )
-
-# This imports must be located here (after Streamlit page configuration) due to Streamlit policies (set_page_config must be the first statement)
-# The comments next to the two lines are used for avoiding errors to be thrown by smoke tests that require the imports to be on top of the document
-from pages.login.login import login  # noqa: E402
-from pages.login.registration import registration  # noqa: E402
 
 # ===== MAIN PAGE =====
 
