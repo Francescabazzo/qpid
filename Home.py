@@ -5,7 +5,7 @@ from pages.login.registration import registration
 
 st.set_page_config(
     page_title='QPID - Homepage',
-    page_icon="utils/logo.png",
+    page_icon="utils/images/logo.png",
     initial_sidebar_state="expanded"
 )
 

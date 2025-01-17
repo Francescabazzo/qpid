@@ -6,7 +6,7 @@ import pandas as pd
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 
-from utils.db_connection import connect2db_NEW
+from utils.db_connection import connect2db
 
 from utils.converters import pronoun_text2num
 
@@ -15,7 +15,7 @@ cookie = None
 def load_from_db():
     global cookie
 
-    with connect2db_NEW() as conn:
+    with connect2db() as conn:
         try:
             df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
             return df.iloc[0]
@@ -25,7 +25,7 @@ def load_from_db():
 def load_to_db(data):
     global cookie
 
-    with connect2db_NEW() as conn:
+    with connect2db() as conn:
 
         try:
             query = (f"UPDATE profiles SET "
@@ -100,7 +100,7 @@ def input_me(_cookie):
 
     st.header("My Profile:")
 
-    st.image("utils/profile_pic.png", width=100)
+    st.image("utils/images/profile_pic.png", width=100)
 
     data['name'] = st.text_input("Name", key="name", placeholder="Enter your first name", value=user['name'])
 

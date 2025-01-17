@@ -5,10 +5,10 @@ import pandas as pd
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 
-from utils.db_connection import connect2db_NEW
+from utils.db_connection import connect2db
 
 from utils.converters import pronoun_num2text
-from utils.utils import calcLatLonRange
+from utils.utils import calc_lat_lon_range
 from backend.backend import get_matches, calculate_scores
 from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
 
@@ -16,7 +16,7 @@ from streamlit_cookies_controller import CookieController
 
 st.set_page_config(
     page_title='QPID - Matches',
-    page_icon="utils/logo.png",
+    page_icon="utils/images/logo.png",
     initial_sidebar_state="expanded"
 )
 
@@ -36,8 +36,8 @@ def loadProfiles(user, likes_dislikes):
         query += f"AND age >= {user['age_other'] - user['age_radius_other']} AND age <= {user['age_other'] + user['age_radius_other']} "
 
     if user['distance_flag_other'] == 1:
-        lat_min, lat_max, lon_min, lon_max = calcLatLonRange(user['latitude'], user['longitude'],
-                                                             user['distance_km_other'])
+        lat_min, lat_max, lon_min, lon_max = calc_lat_lon_range(user['latitude'], user['longitude'],
+                                                                user['distance_km_other'])
         query += f"AND latitude >= {lat_min} AND latitude <= {lat_max} AND longitude >= {lon_min} AND longitude <= {lon_max} "
 
     # GENRES
@@ -58,7 +58,7 @@ def loadProfiles(user, likes_dislikes):
 
     query += cases.get((user['gender'], user['gender_other']), "")
 
-    with connect2db_NEW() as conn:
+    with connect2db() as conn:
         df = pd.read_sql(query, conn)
 
     # FILTERS OUT DISLIKES
@@ -161,7 +161,7 @@ def find_matches(df_me, likes_dislikes):
 
 
 def set_like_dislike(id_me, id_other, like_dislike):
-    with connect2db_NEW() as conn:
+    with connect2db() as conn:
         try:
             query = f"INSERT INTO likes SET ID='{id_me}', ID_other='{id_other}', like_dislike='{like_dislike}'"
 
