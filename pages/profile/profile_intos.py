@@ -1,113 +1,103 @@
 import streamlit as st
-
 import pandas as pd
-
+from utils.db_connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
-
-from utils.db_connection import connect2db
-
 from utils.converters import gender_text2num, boolean_text2num
 
-cookie = None
 
-
-def load_from_db():
-    global cookie
-
-    with connect2db() as conn:
-        try:
-            df = pd.read_sql(f"SELECT * from intos WHERE ID='{cookie.get('user_ID')}'", conn)
-
-            return df.iloc[0]
-        except exc as e:
-            st.error(f"An error occurred while reading data from database: {e}", icon="❌")
-
-
-def load_to_db(data):
-    global cookie
-
-    with connect2db() as conn:
-
-        try:
-            query = (f"UPDATE intos SET "
-                     f"gender='{gender_text2num(data['gender'])}',"
-                     f"age='{data['age']}',"
-                     f"age_flag='{boolean_text2num(data['age_flag'])}',"
-                     f"age_radius='{data['age_radius']}',"
-                     f"distance_flag='{boolean_text2num(data['distance_flag'])}',"
-                     f"distance_km='{data['distance_km']}',"
-                     f"attractiveness_important='{data['attractiveness_important']}',"
-                     f"sincerity_important='{data['sincerity_important']}',"
-                     f"intelligence_important='{data['intelligence_important']}',"
-                     f"funniness_important='{data['funniness_important']}',"
-                     f"ambition_important='{data['ambition_important']}',")
-
-            if not data['same_interest']:
-                query += (f"sports='{data['sports']}',"
-                          f"tv_sports='{data['tv_sports']}',"
-                          f"exercise='{data['exercise']}',"
-                          f"dining='{data['dining']}',"
-                          f"art='{data['art']}',"
-                          f"hiking='{data['hiking']}',"
-                          f"gaming='{data['gaming']}',"
-                          f"clubbing='{data['clubbing']}',"
-                          f"reading='{data['reading']}',"
-                          f"tv='{data['tv']}',"
-                          f"theater='{data['theater']}',"
-                          f"movies='{data['movies']}',"
-                          f"music='{data['music']}',"
-                          f"shopping='{data['shopping']}',"
-                          f"yoga='{data['yoga']}', ")
-            else:
-                query += (f"sports=(SELECT sports FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"tv_sports=(SELECT tv_sports FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"exercise=(SELECT exercise FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"dining=(SELECT dining FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"art=(SELECT art FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"hiking=(SELECT hiking FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"gaming=(SELECT gaming FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"clubbing=(SELECT clubbing FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"reading=(SELECT reading FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"tv=(SELECT tv FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"theater=(SELECT theater FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"movies=(SELECT movies FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"music=(SELECT music FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"shopping=(SELECT shopping FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
-                          f"yoga=(SELECT yoga FROM profiles WHERE ID ='{cookie.get('user_ID')}'),")
-
-            query += (f"same_interest='{boolean_text2num(data['same_interest'])}' "
-                      f"WHERE ID={cookie.get('user_ID')} ")
-
-            conn.execute(text(query))
-            conn.commit()
-
-            st.success("Your intos were correctly updated")
-        except exc as e:
-            conn.rollback()
-            st.error(f"An error occurred while updating your intos: {e}", icon="❌")
-
+# ====================
 
 def input_other(_cookie):
-    global cookie
     cookie = _cookie
 
-    data = {}
+    # ===== UTILITY DB FUNCTIONS =====
 
+    def load_from_db():
+        with connect2db() as conn:
+            try:
+                df = pd.read_sql(f"SELECT * from intos WHERE ID='{cookie.get('user_ID')}'", conn)
+
+                return df.iloc[0]
+            except exc as e:
+                st.error(f"An error occurred while reading data from database: {e}", icon="❌")
+
+    def load_to_db(_data):
+        with connect2db() as conn:
+            try:
+                query = (f"UPDATE intos SET "
+                         f"gender='{gender_text2num(_data['gender'])}',"
+                         f"age='{_data['age']}',"
+                         f"age_flag='{boolean_text2num(_data['age_flag'])}',"
+                         f"age_radius='{_data['age_radius']}',"
+                         f"distance_flag='{boolean_text2num(_data['distance_flag'])}',"
+                         f"distance_km='{_data['distance_km']}',"
+                         f"attractiveness_important='{_data['attractiveness_important']}',"
+                         f"sincerity_important='{_data['sincerity_important']}',"
+                         f"intelligence_important='{_data['intelligence_important']}',"
+                         f"funniness_important='{_data['funniness_important']}',"
+                         f"ambition_important='{_data['ambition_important']}',")
+
+                if not _data['same_interest']:
+                    query += (f"sports='{_data['sports']}',"
+                              f"tv_sports='{_data['tv_sports']}',"
+                              f"exercise='{_data['exercise']}',"
+                              f"dining='{_data['dining']}',"
+                              f"art='{_data['art']}',"
+                              f"hiking='{_data['hiking']}',"
+                              f"gaming='{_data['gaming']}',"
+                              f"clubbing='{_data['clubbing']}',"
+                              f"reading='{_data['reading']}',"
+                              f"tv='{_data['tv']}',"
+                              f"theater='{_data['theater']}',"
+                              f"movies='{_data['movies']}',"
+                              f"music='{_data['music']}',"
+                              f"shopping='{_data['shopping']}',"
+                              f"yoga='{_data['yoga']}', ")
+                else:
+                    query += (f"sports=(SELECT sports FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"tv_sports=(SELECT tv_sports FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"exercise=(SELECT exercise FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"dining=(SELECT dining FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"art=(SELECT art FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"hiking=(SELECT hiking FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"gaming=(SELECT gaming FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"clubbing=(SELECT clubbing FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"reading=(SELECT reading FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"tv=(SELECT tv FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"theater=(SELECT theater FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"movies=(SELECT movies FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"music=(SELECT music FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"shopping=(SELECT shopping FROM profiles WHERE ID ='{cookie.get('user_ID')}'),"
+                              f"yoga=(SELECT yoga FROM profiles WHERE ID ='{cookie.get('user_ID')}'),")
+
+                query += (f"same_interest='{boolean_text2num(_data['same_interest'])}' "
+                          f"WHERE ID={cookie.get('user_ID')} ")
+
+                conn.execute(text(query))
+                conn.commit()
+
+                st.success("Your intos were correctly updated")
+            except exc as e:
+                conn.rollback()
+                st.error(f"An error occurred while updating your intos: {e}", icon="❌")
+
+    # ===== END of UTILITY DB FUNCTIONS =====
+
+    data = {}
     intos = load_from_db()
+
+    # ----------
 
     st.header("What are you looking for?")
 
     tab1, tab2 = st.columns(2, gap='medium')
 
     with tab1:
-
         data['gender'] = st.radio("Gender", ["Male", "Female", ":rainbow[All]"], key="gender",
                                   index=((int(intos['gender']) - 1) if intos['gender'] else 0))
-
         data['age'] = st.number_input("Age", key="age", min_value=18, max_value=100, step=1,
                                       value=(intos['age'] if (intos['age']) else 30))
-
         data['age_flag'] = st.checkbox("Specify a range for age", key="age_flag", value=intos['age_flag'])
 
         if data['age_flag']:

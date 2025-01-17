@@ -1,6 +1,5 @@
-import hydralit_components as hc
 import streamlit as st
-
+import hydralit_components as hc
 from streamlit_cookies_controller import CookieController
 from pages.profile.profile_me import input_me
 from pages.profile.profile_intos import input_other
@@ -11,14 +10,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ===== MAIN PAGE =====
+
 cookie = CookieController()
 
-
-
-if not cookie.get('user_login') :
+if not cookie.get('user_login'):
     st.warning("You must log in to continue!", icon="⚠️")
 else:
-
     INPUT_ME = 'My Profile'
     INPUT_OTHER = 'My Interests'
 
@@ -50,5 +48,6 @@ else:
     elif chosen_tab == INPUT_OTHER:
         input_other(cookie)
 
+    # Just a shortcut for introducing a vertical space
     for i in range(4):
         st.markdown('#')
