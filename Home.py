@@ -7,8 +7,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-from pages.login.login import login                     # noqa: E402
-from pages.login.registration import registration       # noqa: E402
+# This imports must be located here (after Streamlit page configuration) due to Streamlit policies (set_page_config must be the first statement)
+# The comments next to the two lines are used for avoiding errors to be thrown by smoke tests that require the imports to be on top of the document
+from pages.login.login import login  # noqa: E402
+from pages.login.registration import registration  # noqa: E402
 
 # ===== MAIN PAGE =====
 
@@ -52,6 +54,7 @@ if chosen_tab == LOGIN:
 elif chosen_tab == REGISTRATION:
     registration()
 
+# Just a shortcut for introducing a vertical space
 for i in range(4):
     st.markdown('#')
 
