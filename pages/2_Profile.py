@@ -2,6 +2,8 @@ import hydralit_components as hc
 import streamlit as st
 
 from streamlit_cookies_controller import CookieController
+from pages.profile.profile_me import input_me
+from pages.profile.profile_intos import input_other
 
 st.set_page_config(
     page_title='QPID - Profile',
@@ -11,8 +13,7 @@ st.set_page_config(
 
 cookie = CookieController()
 
-from pages.profile.profile_me import input_me
-from pages.profile.profile_intos import input_other
+
 
 if not cookie.get('user_login') :
     st.warning("You must log in to continue!", icon="⚠️")
