@@ -6,6 +6,7 @@ def gender_text2num(gender):
     else:
         return 3
 
+
 def pronoun_text2num(gender):
     if gender == 'He/Him':
         return 1
@@ -14,6 +15,7 @@ def pronoun_text2num(gender):
     else:
         return 3
 
+
 def pronoun_num2text(gender):
     if gender == '1':
         return 'He/Him'
@@ -21,6 +23,7 @@ def pronoun_num2text(gender):
         return 'She/Her'
     else:
         return 'They/Them'
+
 
 def boolean_text2num(boolean):
     if boolean:
