@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title='QPID - Description',
-    page_icon="utils/logo.png",
+    page_icon="utils/images/logo.png",
     initial_sidebar_state="expanded"
 )
 

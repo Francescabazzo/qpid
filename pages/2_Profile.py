@@ -7,7 +7,7 @@ from pages.profile.profile_intos import input_other
 
 st.set_page_config(
     page_title='QPID - Profile',
-    page_icon="utils/logo.png",
+    page_icon="utils/images/logo.png",
     initial_sidebar_state="expanded"
 )
 

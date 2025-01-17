@@ -4,14 +4,14 @@ from utils.converters import pronoun_num2text
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 
-from utils.db_connection import connect2db_NEW
+from utils.db_connection import connect2db
 import pandas as pd
 
 from streamlit_cookies_controller import CookieController
 
 st.set_page_config(
     page_title='QPID - Matches',
-    page_icon="utils/logo.png",
+    page_icon="utils/images/logo.png",
     initial_sidebar_state="expanded"
 )
 
@@ -64,7 +64,7 @@ def load_dislikes(likes_dislikes):
 
 
 def callback():
-    with connect2db_NEW() as conn:
+    with connect2db() as conn:
         try:
             conn.execute(text(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}"))
             conn.commit()

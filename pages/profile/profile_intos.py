@@ -5,7 +5,7 @@ import pandas as pd
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 
-from utils.db_connection import connect2db_NEW
+from utils.db_connection import connect2db
 
 from utils.converters import gender_text2num, boolean_text2num
 
@@ -15,7 +15,7 @@ cookie = None
 def load_from_db():
     global cookie
 
-    with connect2db_NEW() as conn:
+    with connect2db() as conn:
         try:
             df = pd.read_sql(f"SELECT * from intos WHERE ID='{cookie.get('user_ID')}'", conn)
 
@@ -27,7 +27,7 @@ def load_from_db():
 def load_to_db(data):
     global cookie
 
-    with connect2db_NEW() as conn:
+    with connect2db() as conn:
 
         try:
             query = (f"UPDATE intos SET "
