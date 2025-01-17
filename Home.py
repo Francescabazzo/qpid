@@ -58,5 +58,5 @@ for i in range(4):
 # ===== SIDEBAR =====
 
 st.sidebar.title("Welcome to QPID!")
-st.sidebar.image("utils/logo.png", width=50)
+st.sidebar.image("utils/images/logo.png", width=50)
 st.sidebar.markdown("**QPID** is a dating app, where you can find your perfect match based on your interests!")
