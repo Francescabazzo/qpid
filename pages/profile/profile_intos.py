@@ -4,6 +4,7 @@ from utils.db_connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 from utils.converters import gender_text2num, boolean_text2num
+from utils.logger import log
 
 
 # ====================
@@ -18,9 +19,13 @@ def input_other(_cookie):
             try:
                 df = pd.read_sql(f"SELECT * from intos WHERE ID='{cookie.get('user_ID')}'", conn)
 
+                log("INTOS RETRIEVAL")
+
                 return df.iloc[0]
             except exc as e:
                 st.error(f"An error occurred while reading data from database: {e}", icon="❌")
+
+                log(f"INTOS RETRIEVAL ERROR: {e}")
 
     def load_to_db(_data):
         with connect2db() as conn:
@@ -78,9 +83,13 @@ def input_other(_cookie):
                 conn.commit()
 
                 st.success("Your intos were correctly updated")
+
+                log("INTOS UPDATE")
             except exc as e:
                 conn.rollback()
                 st.error(f"An error occurred while updating your intos: {e}", icon="❌")
+
+                log(f"INTOS UPDATE ERROR: {e}")
 
     # ===== END of UTILITY DB FUNCTIONS =====
 

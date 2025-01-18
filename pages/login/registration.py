@@ -2,6 +2,7 @@ import streamlit as st
 from utils.db_connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
+from utils.logger import log
 
 
 # ====================
@@ -38,9 +39,13 @@ def registration():
                     # -----------
 
                     st.success("The new account has been created!", icon="💚")
+
+                    log(f"REGISTRATION of user <{st.session_state['username']}>")
                 except exc as e:
                     conn.rollback()
                     st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
+
+                    log(f"REGISTRATION of user <{st.session_state['username']}> ERROR: {e}")
 
     # ===== END of CALLBACK =====
 

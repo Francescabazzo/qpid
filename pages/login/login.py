@@ -3,6 +3,7 @@ from streamlit_cookies_controller import CookieController
 from utils.db_connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
+from utils.logger import log
 
 
 # ====================
@@ -23,12 +24,18 @@ def login():
                 if len(users):
                     cookie.set('user_login', st.session_state['username'])
                     cookie.set('user_ID', users[0][0])
+
+                    log(f"Log-IN")
                 else:
                     st.error("Wrong username or password!", icon="❌")
             except exc as e:
                 st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
+                log(f"LOG-IN of {st.session_state['username']} ERROR: {e}")
+
     def logout_callback():
+        log(f"Log-OUT")
+
         cookie.remove('user_login')
 
         for key in st.session_state.keys():

@@ -6,6 +6,7 @@ from utils.db_connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 from utils.converters import pronoun_text2num
+from utils.logger import log
 
 
 # ====================
@@ -19,9 +20,14 @@ def input_me(_cookie):
         with connect2db() as conn:
             try:
                 df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
+
+                log("PROFILE RETRIEVAL")
+
                 return df.iloc[0]
             except exc as e:
                 st.error(f"An error occurred while reading data from database: {e}", icon="❌")
+
+                log(f"PROFILE RETRIEVAL ERROR: {e}")
 
     def load_to_db(_data):
         with connect2db() as conn:
@@ -81,9 +87,13 @@ def input_me(_cookie):
                 conn.commit()
 
                 st.success("Your profile was correctly updated")
+
+                log("PROFILE UPDATE")
             except exc as e:
                 conn.rollback()
                 st.error(f"An error occurred while updating your profile: {e}", icon="❌")
+
+                log(f"PROFILE UPDATE ERROR: {e}")
 
     # ===== END of UTILITY DB FUNCTIONS =====
 
