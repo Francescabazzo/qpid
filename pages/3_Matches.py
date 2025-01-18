@@ -34,11 +34,11 @@ def load_personal_profile():
         try:
             df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
 
-            log("PERSONAL PROFILE LOADING")
+            log("PERSONAL PROFILE LOADING", 0, __name__)
         except exc as e:
             st.error(f"An error occurred while reading personal profile: {e}", icon="❌")
 
-            log(f"PERSONAL PROFILE LOADING ERROR: {e}")
+            log(f"PERSONAL PROFILE LOADING ERROR: {e}", 2, __name__)
 
     return df
 
@@ -80,11 +80,11 @@ def load_profiles(_user, _likes_dislikes):
         try:
             df = pd.read_sql(query, conn)
 
-            log("CANDIDATE PROFILES LOADING")
+            log("CANDIDATE PROFILES LOADING", 0, __name__)
         except exc as e:
             st.error(f"An error occurred while reading candidate profiles: {e}", icon="❌")
 
-            log(f"CANDIDATE PROFILES LOADING ERROR: {e}")
+            log(f"CANDIDATE PROFILES LOADING ERROR: {e}", 2, __name__)
 
     # Filters out already liked and disliked profiles
     dislikes = _likes_dislikes[_likes_dislikes['like_dislike'] == 0]['ID_other'].tolist()
@@ -137,7 +137,7 @@ def find_matches(_personal_profile):
     likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
     candidate_profiles = load_profiles(_personal_profile, likes_dislikes)
 
-    log(f"MATCHES SEARCH: {candidate_profiles.size} PROFILES FOUND")
+    log(f"MATCHES SEARCH: {candidate_profiles.size} PROFILES FOUND", 0, __name__)
 
     if candidate_profiles.empty:
         st.warning("No matches found. Maybe you might want to change your preferences...")
@@ -163,7 +163,7 @@ def set_like_dislike(id_personal_profile, _id_other_profile, _like_dislike):
             conn.execute(text(query))
             conn.commit()
 
-            log(f"LIKE DISLIKE INSERTING ({_like_dislike})")
+            log(f"LIKE DISLIKE INSERTING ({_like_dislike})", 0, __name__)
 
             if _like_dislike:
                 st.balloons()
@@ -173,7 +173,7 @@ def set_like_dislike(id_personal_profile, _id_other_profile, _like_dislike):
             conn.rollback()
             st.error(f"An error occurred while updating your likes/dislikes in the database: {e}", icon="❌")
 
-            log(f"LIKE DISLIKE INSERTING ({_like_dislike}) ERROR: {e}")
+            log(f"LIKE DISLIKE INSERTING ({_like_dislike}) ERROR: {e}", 0, __name__)
 
 
 # ===== END of UTILS FUNCTIONS =====
@@ -220,7 +220,7 @@ def user_details(_user):
 def callback():
     st.session_state['matches_found'] = True
 
-    log("MATCHES SEARCH OR RE-SEARCH")
+    log("MATCHES SEARCH OR RE-SEARCH", 0, __name__)
 
 
 # ===== END of CALLBACK =====

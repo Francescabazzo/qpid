@@ -24,7 +24,7 @@ cookie = CookieController()
 def load_likes(_likes_dislikes):
     likes = _likes_dislikes.loc[_likes_dislikes['like_dislike'] == 1]
 
-    log(f"LIKES LOADING: {len(likes)} ENTRIES FOUND")
+    log(f"LIKES LOADING: {len(likes)} ENTRIES FOUND", 0, __name__)
 
     if likes.empty:
         st.warning("No likes yet...")
@@ -54,7 +54,7 @@ def load_likes(_likes_dislikes):
 def load_dislikes(_likes_dislikes):
     dislikes = _likes_dislikes.loc[_likes_dislikes['like_dislike'] == 0]
 
-    log(f"DISLIKES LOADING: {len(dislikes)} ENTRIES FOUND")
+    log(f"DISLIKES LOADING: {len(dislikes)} ENTRIES FOUND", 0, __name__)
 
     if dislikes.empty:
         st.warning("No dislikes yet...")
@@ -81,12 +81,12 @@ def callback():
             conn.execute(text(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}"))
             conn.commit()
 
-            log("LIKES DISLIKES RESET")
+            log("LIKES DISLIKES RESET", 0, __name__)
 
         except exc as e:
             st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
 
-            log(f"LIKES DISLIKES RESET ERROR: {e}")
+            log(f"LIKES DISLIKES RESET ERROR: {e}", 2, __name__)
 
 
 # ===== END of CALLBACK =====

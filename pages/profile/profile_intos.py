@@ -19,13 +19,13 @@ def input_other(_cookie):
             try:
                 df = pd.read_sql(f"SELECT * from intos WHERE ID='{cookie.get('user_ID')}'", conn)
 
-                log("INTOS RETRIEVAL")
+                log("INTOS RETRIEVAL", 0, __name__)
 
                 return df.iloc[0]
             except exc as e:
                 st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
-                log(f"INTOS RETRIEVAL ERROR: {e}")
+                log(f"INTOS RETRIEVAL ERROR: {e}", 2, __name__)
 
     def load_to_db(_data):
         with connect2db() as conn:
@@ -84,12 +84,12 @@ def input_other(_cookie):
 
                 st.success("Your intos were correctly updated")
 
-                log("INTOS UPDATE")
+                log("INTOS UPDATE", 0, __name__)
             except exc as e:
                 conn.rollback()
                 st.error(f"An error occurred while updating your intos: {e}", icon="❌")
 
-                log(f"INTOS UPDATE ERROR: {e}")
+                log(f"INTOS UPDATE ERROR: {e}", 2, __name__)
 
     # ===== END of UTILITY DB FUNCTIONS =====
 

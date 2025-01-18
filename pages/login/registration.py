@@ -40,12 +40,12 @@ def registration():
 
                     st.success("The new account has been created!", icon="💚")
 
-                    log(f"REGISTRATION of user <{st.session_state['username']}>")
+                    log(f"REGISTRATION of user <{st.session_state['username']}>", 0, __name__)
                 except exc as e:
                     conn.rollback()
                     st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
 
-                    log(f"REGISTRATION of user <{st.session_state['username']}> ERROR: {e}")
+                    log(f"REGISTRATION of user <{st.session_state['username']}> ERROR: {e}", 2, __name__)
 
     # ===== END of CALLBACK =====
 
