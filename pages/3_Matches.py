@@ -8,10 +8,8 @@ from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 from utils.converters import pronoun_num2text
 from utils.utils import calc_lat_lon_range
-from backend.backend import get_matches, calculate_scores
 from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
-
-from streamlit_cookies_controller import CookieController
+from backend.importer import load_pickles
 
 st.set_page_config(
     page_title='QPID - Matches',
@@ -23,7 +21,8 @@ st.set_page_config(
 
 cookie = CookieController()
 
-def loadMe():
+calculate_scores, get_matches = load_pickles()
+
 
 # ====================
 
@@ -154,6 +153,7 @@ def set_like_dislike(id_personal_profile, _id_other_profile, _like_dislike):
         except exc as e:
             conn.rollback()
             st.error(f"An error occurred while updating your likes/dislikes in the database: {e}", icon="❌")
+
 
 # ===== END of UTILS FUNCTIONS =====
 
