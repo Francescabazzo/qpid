@@ -21,5 +21,3 @@ def log(message, level=0, name=None):
             logger.warning(message)
         case 2:
             logger.error(message)
-
-    print(message)
