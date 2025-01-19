@@ -3,14 +3,10 @@ import numpy as np
 from sklearn.cluster import HDBSCAN
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
-import sys
-sys.path.append('./utils')
-from logger import log
 
 def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     deformation_exps = [(1/5), (1/1.3), 1, 2, 5]
     is_distance_important = bool(search['distance_flag_other'].values[0])
-    log(f"get_matches(): working with {df1.shape[0]} candidates, is_distance_important: {is_distance_important}")
     unnecessary = ["email", "name", "bio", "gender", "gender_other", "age_flag_other",
                    "age_radius_other", "distance_flag_other", "distance_km_other",
                    "same_interests"]
@@ -70,8 +66,6 @@ def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     X = X[clustering.labels_ == clustering.labels_[-1]]
     IDs = IDs[clustering.labels_ == clustering.labels_[-1]]
 
-    log(f"get_matches(): candidates after clustering: {X.shape[0]-1}")
-
     # ---Nearest Neighbors---
     nn = NearestNeighbors(n_jobs=-1)
     selected_features = np.r_[0:23] if is_distance_important else np.r_[0,3:23]
@@ -87,7 +81,6 @@ def calculate_scores(candidates:pd.DataFrame, search:pd.DataFrame) -> np.ndarray
     # 13:28 => personal interests
     # 34:39 => importance of attractivenes, ...
     # 40:55 => searched interests
-    log(f"calculate_scores(): calculating scores for {candidates.shape[0]} candidates")
     c = candidates.to_numpy()
     s = search.to_numpy()[0]
     scores = np.absolute(c[:,8:8+20]-s[np.r_[34:34+5, 40:40+15]])
