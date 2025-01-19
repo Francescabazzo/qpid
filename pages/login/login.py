@@ -25,16 +25,16 @@ def login():
                     cookie.set('user_login', st.session_state['username'])
                     cookie.set('user_ID', users[0][0])
 
-                    log("Log-IN")
+                    log("Log-IN", 0, __name__)
                 else:
                     st.error("Wrong username or password!", icon="❌")
             except exc as e:
                 st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
-                log(f"LOG-IN of {st.session_state['username']} ERROR: {e}")
+                log(f"LOG-IN of {st.session_state['username']} ERROR: {e}", 2, __name__)
 
     def logout_callback():
-        log("Log-OUT")
+        log("Log-OUT", 0, __name__)
 
         cookie.remove('user_login')
 

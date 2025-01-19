@@ -21,13 +21,13 @@ def input_me(_cookie):
             try:
                 df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
 
-                log("PROFILE RETRIEVAL")
+                log("PROFILE RETRIEVAL", 0, __name__)
 
                 return df.iloc[0]
             except exc as e:
                 st.error(f"An error occurred while reading data from database: {e}", icon="❌")
 
-                log(f"PROFILE RETRIEVAL ERROR: {e}")
+                log(f"PROFILE RETRIEVAL ERROR: {e}", 2, __name__)
 
     def load_to_db(_data):
         with connect2db() as conn:
@@ -88,12 +88,12 @@ def input_me(_cookie):
 
                 st.success("Your profile was correctly updated")
 
-                log("PROFILE UPDATE")
+                log("PROFILE UPDATE", 0, __name__)
             except exc as e:
                 conn.rollback()
                 st.error(f"An error occurred while updating your profile: {e}", icon="❌")
 
-                log(f"PROFILE UPDATE ERROR: {e}")
+                log(f"PROFILE UPDATE ERROR: {e}", 2, __name__)
 
     # ===== END of UTILITY DB FUNCTIONS =====
 
