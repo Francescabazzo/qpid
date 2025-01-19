@@ -3,7 +3,9 @@ import numpy as np
 from sklearn.cluster import HDBSCAN
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
-from utils.logger import log
+import sys
+sys.path.append('./utils')
+from logger import log
 
 def get_matches(df1:pd.DataFrame, search:pd.DataFrame) -> list:
     deformation_exps = [(1/5), (1/1.3), 1, 2, 5]
