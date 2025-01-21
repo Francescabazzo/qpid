@@ -342,3 +342,16 @@ def set_like_dislike(_id, _id_other, _like_dislike):
             st.error(f"An error occurred while updating your likes/dislikes in the database: {e}", icon="❌")
 
             log(f"LIKE DISLIKE INSERTING ({_like_dislike}) ERROR: {e}", 0)
+
+def reset_likes_dislikes(_id):
+    with connect2db() as conn:
+        try:
+            conn.execute(text(f"DELETE FROM likes WHERE ID = {_id}"))
+            conn.commit()
+
+            log("LIKES DISLIKES RESET", 0)
+
+        except exc as e:
+            st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
+
+            log(f"LIKES DISLIKES RESET ERROR: {e}", 2)

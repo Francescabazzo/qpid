@@ -1,12 +1,10 @@
 import streamlit as st
 from streamlit_cookies_controller import CookieController
 import pandas as pd
-from utils.db.connection import connect2db
-from sqlalchemy.exc import DBAPIError as exc
-from sqlalchemy import text
 from utils.db.queries import load_likes_dislikes, load_profiles_from_ids
 from utils.converters import pronoun_num2text
 from utils.logger import log
+import utils.db.queries as db
 
 st.set_page_config(
     page_title='QPID - Matches',
@@ -24,7 +22,7 @@ cookie = CookieController()
 def load_likes(_likes_dislikes):
     likes = _likes_dislikes.loc[_likes_dislikes['like_dislike'] == 1]
 
-    log(f"LIKES LOADING: {len(likes)} ENTRIES FOUND", 0, __name__)
+    log(f"LIKES LOADING: {len(likes)} ENTRIES FOUND", 0)
 
     if likes.empty:
         st.warning("No likes yet...")
@@ -54,7 +52,7 @@ def load_likes(_likes_dislikes):
 def load_dislikes(_likes_dislikes):
     dislikes = _likes_dislikes.loc[_likes_dislikes['like_dislike'] == 0]
 
-    log(f"DISLIKES LOADING: {len(dislikes)} ENTRIES FOUND", 0, __name__)
+    log(f"DISLIKES LOADING: {len(dislikes)} ENTRIES FOUND", 0)
 
     if dislikes.empty:
         st.warning("No dislikes yet...")
@@ -76,17 +74,7 @@ def load_dislikes(_likes_dislikes):
 # ===== CALLBACK =====
 
 def callback():
-    with connect2db() as conn:
-        try:
-            conn.execute(text(f"DELETE FROM likes WHERE ID = {cookie.get('user_ID')}"))
-            conn.commit()
-
-            log("LIKES DISLIKES RESET", 0, __name__)
-
-        except exc as e:
-            st.error(f"An error occurred while inserting data into the database: {e}", icon="❌")
-
-            log(f"LIKES DISLIKES RESET ERROR: {e}", 2, __name__)
+    db.reset_likes_dislikes(cookie.get('user_ID'))
 
 
 # ===== END of CALLBACK =====
