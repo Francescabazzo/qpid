@@ -7,6 +7,8 @@ import utils.db.queries as db
 # ====================
 
 def registration():
+    cookie = CookieController()
+
     # ===== FORM CALLBACK =====
 
     def callback():

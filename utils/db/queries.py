@@ -38,7 +38,6 @@ def login(_username, _password):
 # ========== REGISTRATION ==========
 
 def registration(_username, _password, _email):
-    CookieController()
 
     with connect2db() as conn:
         try:
