@@ -38,8 +38,12 @@ def login(_username, _password):
 # ========== REGISTRATION ==========
 
 def registration(_username, _password, _email):
+    CookieController()
+
     with connect2db() as conn:
         try:
+            log(f"ddddd", 0)
+
             query = f"INSERT INTO users SET username='{_username}', password='{_password}', email='{_email}'"
             conn.execute(text(query))
 

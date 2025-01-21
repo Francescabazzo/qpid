@@ -7,10 +7,11 @@ from utils.logger import log
 def connect2db():
     try:
         engine = create_engine(st.secrets['database']['connection_url'])
+        conn = engine.connect()
 
         log("CONNECTION TO DB", 0)
 
-        return engine.connect()
+        return conn
     except exc as e:
         st.error(f"An error was encountered while connecting to the database: {e}")
 
