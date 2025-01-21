@@ -42,8 +42,6 @@ def registration(_username, _password, _email):
 
     with connect2db() as conn:
         try:
-            log(f"ddddd", 0)
-
             query = f"INSERT INTO users SET username='{_username}', password='{_password}', email='{_email}'"
             conn.execute(text(query))
 
