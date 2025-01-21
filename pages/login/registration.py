@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_cookies_controller import CookieController
 
 import utils.db.queries as db
 
@@ -6,6 +7,8 @@ import utils.db.queries as db
 # ====================
 
 def registration():
+    cookie = CookieController()     # noqa: F841
+
     # ===== FORM CALLBACK =====
 
     def callback():
