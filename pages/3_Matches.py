@@ -2,15 +2,10 @@ import streamlit as st
 from streamlit_cookies_controller import CookieController
 from streamlit_folium import st_folium
 import folium
-import pandas as pd
-from utils.db.connection import connect2db
-from sqlalchemy.exc import DBAPIError as exc
-from sqlalchemy import text
 from utils.converters import pronoun_num2text
-from utils.utils import calc_lat_lon_range
-from utils.db.queries import load_likes_dislikes, load_profiles_from_ids
 from backend.importer import load_pickles
 from utils.logger import log
+import utils.db.queries as db
 
 st.set_page_config(
     page_title='QPID - Matches',
@@ -30,70 +25,11 @@ calculate_scores, get_matches = load_pickles()
 # ===== UTILS FUNCTIONS =====
 
 def load_personal_profile():
-    with connect2db() as conn:
-        try:
-            df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
-
-            log("PERSONAL PROFILE LOADING", 0, __name__)
-        except exc as e:
-            st.error(f"An error occurred while reading personal profile: {e}", icon="❌")
-
-            log(f"PERSONAL PROFILE LOADING ERROR: {e}", 2, __name__)
-
-    return df
+    return db.load_full_profile(cookie.get('user_ID'))
 
 
 def load_profiles(_user, _likes_dislikes):
-    _user = _user.iloc[0]
-
-    query = f"SELECT * FROM full_profiles WHERE ID <> {cookie.get('user_ID')} "
-
-    # Filters out profiles out-of-age-range
-    if _user['age_flag_other'] == 1:
-        query += f"AND age >= {_user['age_other'] - _user['age_radius_other']} AND age <= {_user['age_other'] + _user['age_radius_other']} "
-
-    # Filters out profiles out-of-distance-range
-    if _user['distance_flag_other'] == 1:
-        lat_min, lat_max, lon_min, lon_max = calc_lat_lon_range(_user['latitude'], _user['longitude'],
-                                                                _user['distance_km_other'])
-        query += f"AND latitude >= {lat_min} AND latitude <= {lat_max} AND longitude >= {lon_min} AND longitude <= {lon_max} "
-
-    # Selects only the profiles compatible with the gender and sexual orientation
-    cases = {
-        ('1', '1'): "AND ((gender = '1' AND gender_other = '1') OR (gender = '1' AND gender_other = '3'))",
-        ('1', '2'): "AND ((gender = '2' AND gender_other = '1') OR (gender = '2' AND gender_other = '3'))",
-        ('1',
-         '3'): "AND ((gender = '1' AND gender_other = '1') OR (gender = '2' AND gender_other = '1')OR (gender = '3' AND gender_other = '1')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
-        ('2', '1'): "AND ((gender = '1' AND gender_other = '2') OR (gender = '1' AND gender_other = '3'))",
-        ('2', '2'): "AND ((gender = '2' AND gender_other = '2') OR (gender = '2' AND gender_other = '3'))",
-        ('2',
-         '3'): "AND ((gender = '1' AND gender_other = '2') OR (gender = '2' AND gender_other = '2')OR (gender = '3' AND gender_other = '2')OR (gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
-        ('3', '1'): "AND (gender = '1' AND gender_other = '3')",
-        ('3', '2'): "AND (gender = '2' AND gender_other = '3')",
-        ('3',
-         '3'): "AND ((gender = '1' AND gender_other = '3')OR (gender = '2' AND gender_other = '3')OR (gender = '3' AND gender_other = '3'))",
-    }
-
-    query += cases.get((_user['gender'], _user['gender_other']), "")
-
-    with connect2db() as conn:
-        try:
-            df = pd.read_sql(query, conn)
-
-            log("CANDIDATE PROFILES LOADING", 0, __name__)
-        except exc as e:
-            st.error(f"An error occurred while reading candidate profiles: {e}", icon="❌")
-
-            log(f"CANDIDATE PROFILES LOADING ERROR: {e}", 2, __name__)
-
-    # Filters out already liked and disliked profiles
-    dislikes = _likes_dislikes[_likes_dislikes['like_dislike'] == 0]['ID_other'].tolist()
-    likes = _likes_dislikes[_likes_dislikes['like_dislike'] == 1]['ID_other'].tolist()
-
-    df = df[~df['ID'].isin(dislikes)]
-    df = df[~df['ID'].isin(likes)]
-
-    return df
+    return db.load_candidates(cookie.get('user_ID'), _user, _likes_dislikes)
 
 
 def build_profile_card(_user, _match_score):
@@ -134,10 +70,10 @@ def build_profile_card(_user, _match_score):
 
 
 def find_matches(_personal_profile):
-    likes_dislikes = load_likes_dislikes(cookie.get('user_ID'))
+    likes_dislikes = db.load_likes_dislikes(cookie.get('user_ID'))
     candidate_profiles = load_profiles(_personal_profile, likes_dislikes)
 
-    log(f"MATCHES SEARCH: {candidate_profiles.size} PROFILES FOUND", 0, __name__)
+    log(f"MATCHES SEARCH: {candidate_profiles.size} PROFILES FOUND", 0)
 
     if candidate_profiles.empty:
         st.warning("No matches found. Maybe you might want to change your preferences...")
@@ -148,7 +84,7 @@ def find_matches(_personal_profile):
         else:
             matches = get_matches(candidate_profiles, _personal_profile)
 
-        df_matches = load_profiles_from_ids(matches)
+        df_matches = db.load_profiles_from_ids(matches)
         accuracy_scores = calculate_scores(df_matches, _personal_profile)
 
         for index, row in df_matches.iterrows():
@@ -156,24 +92,7 @@ def find_matches(_personal_profile):
 
 
 def set_like_dislike(id_personal_profile, _id_other_profile, _like_dislike):
-    with connect2db() as conn:
-        try:
-            query = f"INSERT INTO likes SET ID='{id_personal_profile}', ID_other='{_id_other_profile}', like_dislike='{_like_dislike}'"
-
-            conn.execute(text(query))
-            conn.commit()
-
-            log(f"LIKE DISLIKE INSERTING ({_like_dislike})", 0, __name__)
-
-            if _like_dislike:
-                st.balloons()
-            else:
-                st.snow()
-        except exc as e:
-            conn.rollback()
-            st.error(f"An error occurred while updating your likes/dislikes in the database: {e}", icon="❌")
-
-            log(f"LIKE DISLIKE INSERTING ({_like_dislike}) ERROR: {e}", 0, __name__)
+    db.set_like_dislike(id_personal_profile, _id_other_profile, _like_dislike)
 
 
 # ===== END of UTILS FUNCTIONS =====
@@ -220,7 +139,7 @@ def user_details(_user):
 def callback():
     st.session_state['matches_found'] = True
 
-    log("MATCHES SEARCH OR RE-SEARCH", 0, __name__)
+    log("MATCHES SEARCH OR RE-SEARCH", 0)
 
 
 # ===== END of CALLBACK =====
