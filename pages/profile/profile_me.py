@@ -1,12 +1,7 @@
 import streamlit as st
 from streamlit_folium import st_folium
-import pandas as pd
 import folium
-from utils.db.connection import connect2db
-from sqlalchemy.exc import DBAPIError as exc
-from sqlalchemy import text
-from utils.converters import pronoun_text2num
-from utils.logger import log
+import utils.db.queries as db
 
 
 # ====================
@@ -17,83 +12,10 @@ def input_me(_cookie):
     # ===== UTILITY DB FUNCTIONS =====
 
     def load_from_db():
-        with connect2db() as conn:
-            try:
-                df = pd.read_sql(f"SELECT * from full_profiles WHERE ID='{cookie.get('user_ID')}'", conn)
-
-                log("PROFILE RETRIEVAL", 0, __name__)
-
-                return df.iloc[0]
-            except exc as e:
-                st.error(f"An error occurred while reading data from database: {e}", icon="❌")
-
-                log(f"PROFILE RETRIEVAL ERROR: {e}", 2, __name__)
+        return db.load_profile(cookie.get('user_ID'))
 
     def load_to_db(_data):
-        with connect2db() as conn:
-            try:
-                query = (f"UPDATE profiles SET "
-                         f"name='{_data['name']}',"
-                         f"bio='{_data['bio']}',"
-                         f"gender='{pronoun_text2num(_data['gender'])}',"
-                         f"age='{_data['age']}',"
-                         f"longitude='{_data['longitude']}',"
-                         f"latitude='{_data['latitude']}',"
-                         f"attractiveness='{_data['attractiveness']}',"
-                         f"sincerity='{_data['sincerity']}',"
-                         f"intelligence='{_data['intelligence']}',"
-                         f"funniness='{_data['funniness']}',"
-                         f"ambition='{_data['ambition']}',"
-                         f"sports='{_data['sports']}',"
-                         f"tv_sports='{_data['tv_sports']}',"
-                         f"exercise='{_data['exercise']}',"
-                         f"dining='{_data['dining']}',"
-                         f"art='{_data['art']}',"
-                         f"hiking='{_data['hiking']}',"
-                         f"gaming='{_data['gaming']}',"
-                         f"clubbing='{_data['clubbing']}',"
-                         f"reading='{_data['reading']}',"
-                         f"tv='{_data['tv']}',"
-                         f"theater='{_data['theater']}',"
-                         f"movies='{_data['movies']}',"
-                         f"music='{_data['music']}',"
-                         f"shopping='{_data['shopping']}',"
-                         f"yoga='{_data['yoga']}'"
-                         f"WHERE ID='{cookie.get('user_ID')}'")
-
-                conn.execute(text(query))
-
-                if _data['same_interests']:
-                    query = (f"UPDATE intos SET "
-                             f"sports='{_data['sports']}',"
-                             f"tv_sports='{_data['tv_sports']}',"
-                             f"exercise='{_data['exercise']}',"
-                             f"dining='{_data['dining']}',"
-                             f"art='{_data['art']}',"
-                             f"hiking='{_data['hiking']}',"
-                             f"gaming='{_data['gaming']}',"
-                             f"clubbing='{_data['clubbing']}',"
-                             f"reading='{_data['reading']}',"
-                             f"tv='{_data['tv']}',"
-                             f"theater='{_data['theater']}',"
-                             f"movies='{_data['movies']}',"
-                             f"music='{_data['music']}',"
-                             f"shopping='{_data['shopping']}',"
-                             f"yoga='{_data['yoga']}'"
-                             f"WHERE ID='{cookie.get('user_ID')}'")
-
-                    conn.execute(text(query))
-
-                conn.commit()
-
-                st.success("Your profile was correctly updated")
-
-                log("PROFILE UPDATE", 0, __name__)
-            except exc as e:
-                conn.rollback()
-                st.error(f"An error occurred while updating your profile: {e}", icon="❌")
-
-                log(f"PROFILE UPDATE ERROR: {e}", 2, __name__)
+        db.update_profile(cookie.get('user_ID'), _data)
 
     # ===== END of UTILITY DB FUNCTIONS =====
 
