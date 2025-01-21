@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_folium import st_folium
 import pandas as pd
 import folium
-from utils.db_connection import connect2db
+from utils.db.connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 from utils.converters import pronoun_text2num

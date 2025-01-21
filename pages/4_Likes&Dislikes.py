@@ -1,10 +1,10 @@
 import streamlit as st
 from streamlit_cookies_controller import CookieController
 import pandas as pd
-from utils.db_connection import connect2db
+from utils.db.connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
-from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
+from utils.db.queries import load_likes_dislikes, load_profiles_from_ids
 from utils.converters import pronoun_num2text
 from utils.logger import log
 

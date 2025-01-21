@@ -3,12 +3,12 @@ from streamlit_cookies_controller import CookieController
 from streamlit_folium import st_folium
 import folium
 import pandas as pd
-from utils.db_connection import connect2db
+from utils.db.connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 from utils.converters import pronoun_num2text
 from utils.utils import calc_lat_lon_range
-from utils.db_utils import load_likes_dislikes, load_profiles_from_ids
+from utils.db.queries import load_likes_dislikes, load_profiles_from_ids
 from backend.importer import load_pickles
 from utils.logger import log
 

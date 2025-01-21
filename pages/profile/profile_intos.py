@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.db_connection import connect2db
+from utils.db.connection import connect2db
 from sqlalchemy.exc import DBAPIError as exc
 from sqlalchemy import text
 from utils.converters import gender_text2num, boolean_text2num
