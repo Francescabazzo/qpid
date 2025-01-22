@@ -1,4 +1,4 @@
-# 💘 QPID - Find you perfect match! 
+# 💘 QPID - Find your perfect match! 
 
 ## Table of contents: 
 - [Overview](#overview)
