@@ -93,8 +93,8 @@ qpid/
 - **Programming Language**: Python 
 - **Web Framework**: Streamlit
 - **Database**: MySQL
-- **Data visualization**: Pandas, Seaborn, Scikit-learn
-- **Machine Learning**: Scikit-learn (HDBscan clustering, Nearest Neighbors), Scipy, Plotly
+- **Data visualization**: Pandas, Seaborn, Scikit-learn, Scipy, Plotly
+- **Machine Learning**: Scikit-learn (HDBscan clustering, Nearest Neighbors), Scipy
 
 <a id="usage"></a>
 ## 🔧 Usage 
