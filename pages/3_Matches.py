@@ -73,14 +73,14 @@ def find_matches(_personal_profile):
     likes_dislikes = db.load_likes_dislikes(cookie.get('user_ID'))
     candidate_profiles = load_profiles(_personal_profile, likes_dislikes)
 
-    log(f"MATCHES SEARCH: {candidate_profiles.size} PROFILES FOUND", 0)
+    log(f"MATCHES SEARCH: {candidate_profiles.shape[0]} PROFILES FOUND", 0)
 
     if candidate_profiles.empty:
         st.warning("No matches found. Maybe you might want to change your preferences...")
         st.snow()
     else:
-        if candidate_profiles.size <= 5:
-            matches = candidate_profiles
+        if candidate_profiles.shape[0] <= 5:
+            matches = candidate_profiles['ID'].to_numpy()
         else:
             matches = get_matches(candidate_profiles, _personal_profile)
 
