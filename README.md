@@ -53,8 +53,13 @@ qpid/
 │   │   ├── dataset.csv
 │   │   ├── dataset2.csv
 │   │   ├── db_dump.json
+│   ├── italian_cities.csv
+│   ├── speeddating.csv
+│   ├── updated_gender_text.csv
 │── notebooks/            
 │   ├── backend.ipynb
+│   ├── EDA_speeddating.ipynb
+│   ├── new_dataset.ipynb
 │── pages/            
 │   ├── login/
 │   │   ├── __init__.py
@@ -130,6 +135,6 @@ To run QPID locally, follow these steps:
 <a id="future"></a>
 ## 🚀 Future Plans
 
-- **Chat Feature**: Implement messaging capabilities for matched users. 
 - **Analytics**: Collaboration with an analytics service. 
 - **User Experience**: Improve the user experience by changing the web framework. 
+- **Database**: Change the database plan. 
