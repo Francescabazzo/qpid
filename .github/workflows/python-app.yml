@@ -31,6 +31,7 @@ jobs:
       with:
         app-path: Home.py
         ruff: true
+        ruff-options: "--exclude notebooks/*"
               
     
     
